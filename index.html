@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Site Inspection Setup</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f4f6f8;
+    margin: 0;
+    padding: 24px;
+    color: #1f2937;
+  }
+  .container {
+    max-width: 820px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 28px 32px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  h1 { margin: 0 0 6px; font-size: 22px; }
+  h2 { font-size: 16px; margin: 24px 0 12px; color: #111827; }
+  p.subtitle { margin: 0 0 24px; color: #6b7280; font-size: 14px; }
+  label {
+    display: block;
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 6px;
+    color: #374151;
+  }
+  input[type="text"],
+  input[type="email"],
+  select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    background: #fff;
+  }
+  input:focus, select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+  }
+  .field { margin-bottom: 18px; }
+  .site-entry {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 16px;
+    background: #fafafa;
+    margin-bottom: 12px;
+  }
+  .site-entry.editing {
+    border-color: #f59e0b;
+    background: #fffbeb;
+  }
+  .editing-banner {
+    display: none;
+    font-size: 13px;
+    color: #92400e;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .site-entry.editing .editing-banner { display: block; }
+  .days { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .day-chip {
+    padding: 6px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 20px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    user-select: none;
+  }
+  .day-chip.selected {
+    background: #2563eb;
+    color: #fff;
+    border-color: #2563eb;
+  }
+  .btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+  }
+  .btn-add { background: #10b981; color: #fff; width: 100%; padding: 11px; }
+  .btn-add:hover { background: #059669; }
+  .btn-cancel {
+    background: #e5e7eb;
+    color: #374151;
+    width: 100%;
+    padding: 11px;
+    margin-top: 8px;
+    display: none;
+  }
+  .site-entry.editing .btn-cancel { display: block; }
+  .btn-submit {
+    background: #2563eb;
+    color: #fff;
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+    margin-top: 8px;
+  }
+  .btn-submit:hover { background: #1d4ed8; }
+  .btn-submit:disabled { background: #9ca3af; cursor: not-allowed; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: middle;
+  }
+  th { background: #f9fafb; font-weight: 600; color: #374151; font-size: 13px; }
+  tr:last-child td { border-bottom: none; }
+  tr.editing-row { background: #fffbeb; }
+  .table-wrap {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .empty-row {
+    text-align: center;
+    color: #9ca3af;
+    padding: 20px;
+    font-style: italic;
+    font-size: 13px;
+  }
+  .row-actions { white-space: nowrap; }
+  .btn-link {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 2px 6px;
+  }
+  .btn-edit { color: #2563eb; }
+  .btn-remove { color: #dc2626; }
+  .alert {
+    display: none;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 16px;
+    font-size: 14px;
+  }
+  .alert.success { background: #d1fae5; color: #065f46; }
+  .alert.error { background: #fee2e2; color: #991b1b; }
+  select:disabled { background: #f3f4f6; cursor: not-allowed; }
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid #fff;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Site Inspection Setup</h1>
+    <p class="subtitle">Enter your details, add the sites you supervise, then submit.</p>
+
+    <div class="field">
+      <label for="state">State</label>
+      <select id="state" required>
+        <option value="">-- Select State --</option>
+        <option value="WA">WA</option>
+        <option value="ACT">ACT</option>
+        <option value="QLD">QLD</option>
+        <option value="NSW">NSW</option>
+        <option value="VIC">VIC</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="supervisor">Supervisor (Your Name)</label>
+      <select id="supervisor" required disabled>
+        <option value="">-- Select state first --</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="email">Your Email Address</label>
+      <input type="email" id="email" required placeholder="you@example.com" />
+    </div>
+
+    <h2 id="siteFormTitle">Add a Site</h2>
+    <div class="site-entry" id="siteEntry">
+      <div class="editing-banner" id="editingBanner">✎ Editing site — update fields and click "Save Changes"</div>
+      <div class="field">
+        <label for="siteName">Site Name</label>
+        <input type="text" id="siteName" placeholder="Enter site name" />
+      </div>
+      <div class="field">
+        <label for="siteFreq">Inspection Conducting Frequency</label>
+        <select id="siteFreq">
+          <option value="">-- Select Frequency --</option>
+          <option value="Weekly">Weekly</option>
+          <option value="Fortnightly">Fortnightly</option>
+          <option value="Monthly">Monthly</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Inspection Days</label>
+        <div class="days" id="daysPicker">
+          <span class="day-chip" data-day="Mon">Mon</span>
+          <span class="day-chip" data-day="Tue">Tue</span>
+          <span class="day-chip" data-day="Wed">Wed</span>
+          <span class="day-chip" data-day="Thu">Thu</span>
+          <span class="day-chip" data-day="Fri">Fri</span>
+          <span class="day-chip" data-day="Sat">Sat</span>
+          <span class="day-chip" data-day="Sun">Sun</span>
+        </div>
+      </div>
+      <button type="button" class="btn btn-add" id="addSiteBtn">+ Add Site to List</button>
+      <button type="button" class="btn btn-cancel" id="cancelEditBtn">Cancel Edit</button>
+    </div>
+
+    <h2>Sites Added</h2>
+    <div class="table-wrap">
+      <table id="sitesTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Site Name</th>
+            <th>Frequency</th>
+            <th>Days</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="sitesTableBody">
+          <tr><td colspan="5" class="empty-row">No sites added yet.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <button type="button" class="btn btn-submit" id="submitBtn" disabled>Submit</button>
+    <div class="alert success" id="successMsg">✓ Submitted successfully!</div>
+    <div class="alert error" id="errorMsg"></div>
+  </div>
+
+<script>
+  // ============================================================
+  //  PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL BELOW
+  // ============================================================
+  const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwQiSoWFN82ltJscshkFew_SgDkmdt5zYKEJ5LkQUYNzjjQPAHb4eqjzZY1Iyv67vaWdw/exec";
+  // ============================================================
+
+  const supervisorsByState = {
+    WA: ["Janith", "Madushanka", "MJ"],
+    ACT: ["Shelly"],
+    QLD: ["Maggie", "Ranveer"],
+    NSW: ["Yomal", "Charith", "Ikram", "Uma", "Hassan"],
+    VIC: ["Dinesh", "Anish"]
+  };
+
+  const stateEl = document.getElementById("state");
+  const supEl = document.getElementById("supervisor");
+  const emailEl = document.getElementById("email");
+  const siteNameEl = document.getElementById("siteName");
+  const siteFreqEl = document.getElementById("siteFreq");
+  const daysPicker = document.getElementById("daysPicker");
+  const addSiteBtn = document.getElementById("addSiteBtn");
+  const cancelEditBtn = document.getElementById("cancelEditBtn");
+  const siteEntry = document.getElementById("siteEntry");
+  const siteFormTitle = document.getElementById("siteFormTitle");
+  const tableBody = document.getElementById("sitesTableBody");
+  const submitBtn = document.getElementById("submitBtn");
+  const successMsg = document.getElementById("successMsg");
+  const errorMsg = document.getElementById("errorMsg");
+
+  let sites = [];
+  let editIndex = null;
+
+  stateEl.addEventListener("change", () => {
+    const st = stateEl.value;
+    supEl.innerHTML = '<option value="">-- Select Supervisor --</option>';
+    if (st && supervisorsByState[st]) {
+      supervisorsByState[st].forEach(s => {
+        const o = document.createElement("option");
+        o.value = s; o.textContent = s;
+        supEl.appendChild(o);
+      });
+      supEl.disabled = false;
+    } else {
+      supEl.disabled = true;
+    }
+    updateSubmitState();
+  });
+
+  daysPicker.querySelectorAll(".day-chip").forEach(chip => {
+    chip.addEventListener("click", () => chip.classList.toggle("selected"));
+  });
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function refreshTable() {
+    tableBody.innerHTML = "";
+    if (sites.length === 0) {
+      tableBody.innerHTML = '<tr><td colspan="5" class="empty-row">No sites added yet.</td></tr>';
+      return;
+    }
+    sites.forEach((s, i) => {
+      const tr = document.createElement("tr");
+      if (editIndex === i) tr.className = "editing-row";
+      tr.innerHTML = `
+        <td>${i + 1}</td>
+        <td>${escapeHtml(s.siteName)}</td>
+        <td>${escapeHtml(s.frequency)}</td>
+        <td>${s.days.join(", ")}</td>
+        <td class="row-actions">
+          <button type="button" class="btn-link btn-edit" data-edit="${i}">Edit</button>
+          <button type="button" class="btn-link btn-remove" data-remove="${i}">Remove</button>
+        </td>
+      `;
+      tableBody.appendChild(tr);
+    });
+    tableBody.querySelectorAll(".btn-edit").forEach(b => {
+      b.addEventListener("click", () => startEdit(parseInt(b.dataset.edit)));
+    });
+    tableBody.querySelectorAll(".btn-remove").forEach(b => {
+      b.addEventListener("click", () => {
+        const i = parseInt(b.dataset.remove);
+        sites.splice(i, 1);
+        if (editIndex === i) resetEntryForm();
+        else if (editIndex !== null && i < editIndex) editIndex--;
+        refreshTable();
+        updateSubmitState();
+      });
+    });
+  }
+
+  function updateSubmitState() {
+    submitBtn.disabled = !(
+      emailEl.value.trim() &&
+      stateEl.value &&
+      supEl.value &&
+      sites.length > 0 &&
+      editIndex === null
+    );
+  }
+
+  [emailEl, stateEl, supEl].forEach(el => {
+    el.addEventListener("input", updateSubmitState);
+    el.addEventListener("change", updateSubmitState);
+  });
+
+  function resetEntryForm() {
+    editIndex = null;
+    siteNameEl.value = "";
+    siteFreqEl.value = "";
+    daysPicker.querySelectorAll(".day-chip.selected").forEach(c => c.classList.remove("selected"));
+    siteEntry.classList.remove("editing");
+    siteFormTitle.textContent = "Add a Site";
+    addSiteBtn.textContent = "+ Add Site to List";
+  }
+
+  function startEdit(i) {
+    const s = sites[i];
+    editIndex = i;
+    siteNameEl.value = s.siteName;
+    siteFreqEl.value = s.frequency;
+    daysPicker.querySelectorAll(".day-chip").forEach(c => {
+      c.classList.toggle("selected", s.days.includes(c.dataset.day));
+    });
+    siteEntry.classList.add("editing");
+    siteFormTitle.textContent = `Edit Site #${i + 1}`;
+    addSiteBtn.textContent = "Save Changes";
+    refreshTable();
+    updateSubmitState();
+    siteEntry.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  cancelEditBtn.addEventListener("click", () => {
+    resetEntryForm();
+    refreshTable();
+    updateSubmitState();
+  });
+
+  addSiteBtn.addEventListener("click", () => {
+    const name = siteNameEl.value.trim();
+    const freq = siteFreqEl.value;
+    const selectedDays = Array.from(daysPicker.querySelectorAll(".day-chip.selected")).map(c => c.dataset.day);
+
+    if (!name) { alert("Please enter a site name."); return; }
+    if (!freq) { alert("Please select a frequency."); return; }
+    if (selectedDays.length === 0) { alert("Please select at least one day."); return; }
+
+    const record = { siteName: name, frequency: freq, days: selectedDays };
+    if (editIndex !== null) sites[editIndex] = record;
+    else sites.push(record);
+    resetEntryForm();
+    refreshTable();
+    updateSubmitState();
+    siteNameEl.focus();
+  });
+
+  function showError(msg) {
+    errorMsg.textContent = "✕ " + msg;
+    errorMsg.style.display = "block";
+    successMsg.style.display = "none";
+    setTimeout(() => errorMsg.style.display = "none", 6000);
+  }
+
+  function showSuccess() {
+    successMsg.style.display = "block";
+    errorMsg.style.display = "none";
+    setTimeout(() => successMsg.style.display = "none", 5000);
+  }
+
+  submitBtn.addEventListener("click", async () => {
+    if (!WEBHOOK_URL || WEBHOOK_URL.includes("REPLACE_WITH")) {
+      showError("Webhook URL is not configured. Please set WEBHOOK_URL in the code.");
+      return;
+    }
+
+    const payload = {
+      email: emailEl.value.trim(),
+      state: stateEl.value,
+      supervisor: supEl.value,
+      sites,
+      submittedAt: new Date().toISOString()
+    };
+
+    submitBtn.disabled = true;
+    const originalText = submitBtn.textContent;
+    submitBtn.innerHTML = '<span class="spinner"></span>Submitting...';
+
+    try {
+      // Apps Script web apps require text/plain to avoid CORS preflight
+      await fetch(WEBHOOK_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+      // no-cors means we can't read the response, but if fetch didn't throw, it went through
+      showSuccess();
+      emailEl.value = "";
+      stateEl.value = "";
+      supEl.innerHTML = '<option value="">-- Select state first --</option>';
+      supEl.disabled = true;
+      sites = [];
+      resetEntryForm();
+      refreshTable();
+    } catch (err) {
+      showError("Submission failed: " + err.message);
+    } finally {
+      submitBtn.textContent = originalText;
+      updateSubmitState();
+    }
+  });
+</script>
+</body>
+</html>
