@@ -171,7 +171,7 @@
 <body>
   <div class="container">
     <h1>Site Inspection Setup</h1>
-    <p class="subtitle">Enter your details, add the sites you inspect, then submit.</p>
+    <p class="subtitle">Enter your details, add the sites you supervise, then submit.</p>
 
     <div class="field">
       <label for="state">State</label>
@@ -211,9 +211,14 @@
           <option value="Weekly">Weekly</option>
           <option value="Fortnightly">Fortnightly</option>
           <option value="Monthly">Monthly</option>
+          <option value="Other">Other</option>
         </select>
       </div>
-      <div class="field">
+      <div class="field" id="freqOtherField" style="display: none;">
+        <label for="siteFreqOther">Specify Frequency</label>
+        <input type="text" id="siteFreqOther" placeholder="e.g. Every 3 months, Ad-hoc" />
+      </div>
+      <div class="field" id="daysField">
         <label>Inspection Days</label>
         <div class="days" id="daysPicker">
           <span class="day-chip" data-day="Mon">Mon</span>
@@ -272,6 +277,9 @@
   const emailEl = document.getElementById("email");
   const siteNameEl = document.getElementById("siteName");
   const siteFreqEl = document.getElementById("siteFreq");
+  const siteFreqOtherEl = document.getElementById("siteFreqOther");
+  const freqOtherField = document.getElementById("freqOtherField");
+  const daysField = document.getElementById("daysField");
   const daysPicker = document.getElementById("daysPicker");
   const addSiteBtn = document.getElementById("addSiteBtn");
   const cancelEditBtn = document.getElementById("cancelEditBtn");
@@ -305,6 +313,19 @@
     chip.addEventListener("click", () => chip.classList.toggle("selected"));
   });
 
+  function updateFreqUI() {
+    const isOther = siteFreqEl.value === "Other";
+    freqOtherField.style.display = isOther ? "block" : "none";
+    daysField.style.display = isOther ? "none" : "block";
+    if (isOther) {
+      // clear day selections since they won't be used
+      daysPicker.querySelectorAll(".day-chip.selected").forEach(c => c.classList.remove("selected"));
+    } else {
+      siteFreqOtherEl.value = "";
+    }
+  }
+  siteFreqEl.addEventListener("change", updateFreqUI);
+
   function escapeHtml(str) {
     return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
@@ -322,7 +343,7 @@
         <td>${i + 1}</td>
         <td>${escapeHtml(s.siteName)}</td>
         <td>${escapeHtml(s.frequency)}</td>
-        <td>${s.days.join(", ")}</td>
+        <td>${s.days.length ? s.days.join(", ") : "—"}</td>
         <td class="row-actions">
           <button type="button" class="btn-link btn-edit" data-edit="${i}">Edit</button>
           <button type="button" class="btn-link btn-remove" data-remove="${i}">Remove</button>
@@ -364,7 +385,9 @@
     editIndex = null;
     siteNameEl.value = "";
     siteFreqEl.value = "";
+    siteFreqOtherEl.value = "";
     daysPicker.querySelectorAll(".day-chip.selected").forEach(c => c.classList.remove("selected"));
+    updateFreqUI();
     siteEntry.classList.remove("editing");
     siteFormTitle.textContent = "Add a Site";
     addSiteBtn.textContent = "+ Add Site to List";
@@ -374,7 +397,15 @@
     const s = sites[i];
     editIndex = i;
     siteNameEl.value = s.siteName;
-    siteFreqEl.value = s.frequency;
+    const knownFreqs = ["Weekly", "Fortnightly", "Monthly"];
+    if (knownFreqs.includes(s.frequency)) {
+      siteFreqEl.value = s.frequency;
+      siteFreqOtherEl.value = "";
+    } else {
+      siteFreqEl.value = "Other";
+      siteFreqOtherEl.value = s.frequency;
+    }
+    updateFreqUI();
     daysPicker.querySelectorAll(".day-chip").forEach(c => {
       c.classList.toggle("selected", s.days.includes(c.dataset.day));
     });
@@ -394,14 +425,21 @@
 
   addSiteBtn.addEventListener("click", () => {
     const name = siteNameEl.value.trim();
-    const freq = siteFreqEl.value;
+    const freqChoice = siteFreqEl.value;
+    const freqOther = siteFreqOtherEl.value.trim();
     const selectedDays = Array.from(daysPicker.querySelectorAll(".day-chip.selected")).map(c => c.dataset.day);
 
     if (!name) { alert("Please enter a site name."); return; }
-    if (!freq) { alert("Please select a frequency."); return; }
-    if (selectedDays.length === 0) { alert("Please select at least one day."); return; }
+    if (!freqChoice) { alert("Please select a frequency."); return; }
+    if (freqChoice === "Other" && !freqOther) { alert("Please specify the frequency."); return; }
+    if (freqChoice !== "Other" && selectedDays.length === 0) {
+      alert("Please select at least one day.");
+      return;
+    }
 
-    const record = { siteName: name, frequency: freq, days: selectedDays };
+    const finalFreq = freqChoice === "Other" ? freqOther : freqChoice;
+    const finalDays = freqChoice === "Other" ? [] : selectedDays;
+    const record = { siteName: name, frequency: finalFreq, days: finalDays };
     if (editIndex !== null) sites[editIndex] = record;
     else sites.push(record);
     resetEntryForm();
