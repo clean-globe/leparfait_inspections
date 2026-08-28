@@ -65,21 +65,6 @@
     margin-bottom: 10px;
   }
   .site-entry.editing .editing-banner { display: block; }
-  .days { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-  .day-chip {
-    padding: 6px 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 20px;
-    background: #fff;
-    cursor: pointer;
-    font-size: 13px;
-    user-select: none;
-  }
-  .day-chip.selected {
-    background: #2563eb;
-    color: #fff;
-    border-color: #2563eb;
-  }
   .btn {
     padding: 10px 18px;
     border-radius: 8px;
@@ -109,16 +94,16 @@
   }
   .btn-submit:hover { background: #1d4ed8; }
   .btn-submit:disabled { background: #9ca3af; cursor: not-allowed; }
-  table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  th, td {
+  table.sites-tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .sites-tbl th, .sites-tbl td {
     text-align: left;
     padding: 10px 12px;
     border-bottom: 1px solid #e5e7eb;
     vertical-align: middle;
   }
-  th { background: #f9fafb; font-weight: 600; color: #374151; font-size: 13px; }
-  tr:last-child td { border-bottom: none; }
-  tr.editing-row { background: #fffbeb; }
+  .sites-tbl th { background: #f9fafb; font-weight: 600; color: #374151; font-size: 13px; }
+  .sites-tbl tr:last-child td { border-bottom: none; }
+  .sites-tbl tr.editing-row { background: #fffbeb; }
   .table-wrap {
     border: 1px solid #e5e7eb;
     border-radius: 10px;
@@ -164,10 +149,7 @@
     vertical-align: middle;
     margin-right: 6px;
   }
-  .spinner-dark {
-    border-color: #6b7280;
-    border-top-color: transparent;
-  }
+  .spinner-dark { border-color: #6b7280; border-top-color: transparent; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .load-status {
     font-size: 13px;
@@ -179,12 +161,145 @@
   .load-status.loaded { display: inline; color: #059669; }
   .load-status.empty { display: inline; color: #6b7280; font-style: italic; }
   .load-status.error { display: inline; color: #dc2626; }
+
+  .info-notice {
+    background: #eff6ff;
+    border-left: 4px solid #2563eb;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #1e40af;
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+  .save-required-note {
+    background: #fef3c7;
+    border: 1px solid #fcd34d;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: #92400e;
+    margin-top: 12px;
+    margin-bottom: 4px;
+    display: none;
+    line-height: 1.5;
+  }
+  .save-required-note.visible { display: block; }
+  .save-required-note strong { color: #78350f; }
+
+  /* Schedule mode toggle */
+  .schedule-type-toggle {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .radio-label {
+    display: flex !important;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500 !important;
+    font-size: 13px;
+    margin-bottom: 0 !important;
+    cursor: pointer;
+    color: #374151 !important;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #fff;
+    transition: all 0.15s;
+    flex: 1;
+    min-width: 200px;
+    justify-content: center;
+  }
+  .radio-label:hover { border-color: #2563eb; background: #eff6ff; }
+  .radio-label input[type="radio"] { cursor: pointer; margin: 0; accent-color: #2563eb; }
+  .radio-label.active { border-color: #2563eb; background: #eff6ff; color: #1e40af !important; font-weight: 600 !important; }
+
+  /* Schedule grid */
+  .grid-hint {
+    font-size: 12px;
+    color: #6b7280;
+    margin: 0 0 10px;
+    line-height: 1.5;
+  }
+  .schedule-grid-wrap { overflow-x: auto; }
+  .schedule-grid {
+    border-collapse: separate;
+    border-spacing: 4px;
+    margin: 0 auto;
+  }
+  .schedule-grid th, .schedule-grid td { padding: 0; }
+  .schedule-grid th {
+    font-size: 12px;
+    color: #374151;
+    font-weight: 600;
+    padding: 6px;
+    min-width: 44px;
+    text-align: center;
+  }
+  .schedule-grid th.day-header {
+    cursor: pointer;
+    user-select: none;
+    border-radius: 6px;
+    background: #f3f4f6;
+    transition: background 0.15s;
+  }
+  .schedule-grid th.day-header:hover { background: #dbeafe; color: #1e40af; }
+  .schedule-grid th.row-label {
+    text-align: right;
+    padding-right: 10px;
+    color: #6b7280;
+    font-weight: 500;
+    min-width: 60px;
+  }
+  .schedule-cell {
+    width: 44px;
+    height: 36px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    cursor: pointer;
+    background: #fff;
+    transition: all 0.12s;
+  }
+  .schedule-cell:hover {
+    border-color: #2563eb;
+    background: #eff6ff;
+  }
+  .schedule-cell.selected {
+    background: #2563eb;
+    border-color: #2563eb;
+    position: relative;
+  }
+  .schedule-cell.selected::after {
+    content: "✓";
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    display: block;
+    text-align: center;
+    line-height: 34px;
+  }
+  .schedule-summary {
+    font-size: 12px;
+    color: #374151;
+    margin-top: 8px;
+    padding: 6px 10px;
+    background: #f3f4f6;
+    border-radius: 6px;
+    display: none;
+  }
+  .schedule-summary.visible { display: block; }
 </style>
 </head>
 <body>
   <div class="container">
     <h1>Site Inspection Setup</h1>
     <p class="subtitle">Enter your details, add the sites you inspect, then submit.</p>
+
+    <div class="info-notice">
+      ℹ️ <strong>How to use this form:</strong> Add, edit, or remove sites in the list below as many times as you need. <strong>Your changes are only saved when you click "Save &amp; Submit" at the bottom.</strong> Closing the page without submitting will lose any changes.
+    </div>
 
     <div class="field">
       <label for="state">State</label>
@@ -213,29 +328,44 @@
         <input type="text" id="siteName" placeholder="Enter site name" />
       </div>
       <div class="field">
-        <label for="siteFreq">Inspection Conducting Frequency</label>
-        <select id="siteFreq">
-          <option value="">-- Select Frequency --</option>
-          <option value="Weekly">Weekly</option>
-          <option value="Fortnightly">Fortnightly</option>
-          <option value="Monthly">Monthly</option>
-          <option value="Other">Other</option>
-        </select>
-      </div>
-      <div class="field" id="freqOtherField" style="display: none;">
-        <label for="siteFreqOther">Specify Frequency</label>
-        <input type="text" id="siteFreqOther" placeholder="e.g. Every 3 months, Ad-hoc" />
-      </div>
-      <div class="field" id="daysField">
-        <label>Inspection Days</label>
-        <div class="days" id="daysPicker">
-          <span class="day-chip" data-day="Mon">Mon</span>
-          <span class="day-chip" data-day="Tue">Tue</span>
-          <span class="day-chip" data-day="Wed">Wed</span>
-          <span class="day-chip" data-day="Thu">Thu</span>
-          <span class="day-chip" data-day="Fri">Fri</span>
-          <span class="day-chip" data-day="Sat">Sat</span>
-          <span class="day-chip" data-day="Sun">Sun</span>
+        <label>Inspection Schedule</label>
+        <div class="schedule-type-toggle">
+          <label class="radio-label active" id="gridModeLabel">
+            <input type="radio" name="scheduleType" value="grid" checked> 📅 Use 4-week grid
+          </label>
+          <label class="radio-label" id="customModeLabel">
+            <input type="radio" name="scheduleType" value="custom"> ✏️ Custom frequency (Other)
+          </label>
+        </div>
+
+        <div id="gridModeWrap">
+          <p class="grid-hint">
+            Tick the days this site is inspected across a 4-week cycle. The pattern repeats every 4 weeks.<br/>
+            <strong>Tip:</strong> click a day header (Mon, Tue…) to toggle that column across all weeks — quick way to set "Weekly".
+          </p>
+          <div class="schedule-grid-wrap">
+            <table class="schedule-grid" id="scheduleGrid">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th class="day-header" data-day="Mon">Mon</th>
+                  <th class="day-header" data-day="Tue">Tue</th>
+                  <th class="day-header" data-day="Wed">Wed</th>
+                  <th class="day-header" data-day="Thu">Thu</th>
+                  <th class="day-header" data-day="Fri">Fri</th>
+                  <th class="day-header" data-day="Sat">Sat</th>
+                  <th class="day-header" data-day="Sun">Sun</th>
+                </tr>
+              </thead>
+              <tbody id="scheduleGridBody"></tbody>
+            </table>
+          </div>
+          <div class="schedule-summary" id="scheduleSummary"></div>
+        </div>
+
+        <div id="customModeWrap" style="display: none;">
+          <p class="grid-hint">Enter the inspection frequency in your own words when it doesn't fit the 4-week grid.</p>
+          <input type="text" id="customFreq" placeholder="e.g. Every 3 months, Ad-hoc, On request, Twice a year" />
         </div>
       </div>
       <button type="button" class="btn btn-add" id="addSiteBtn">+ Add Site to List</button>
@@ -247,24 +377,27 @@
       <span class="load-status" id="loadStatus"></span>
     </h2>
     <div class="table-wrap">
-      <table id="sitesTable">
+      <table class="sites-tbl" id="sitesTable">
         <thead>
           <tr>
             <th>#</th>
             <th>Site Name</th>
-            <th>Frequency</th>
-            <th>Days</th>
+            <th>Schedule</th>
             <th></th>
           </tr>
         </thead>
         <tbody id="sitesTableBody">
-          <tr><td colspan="5" class="empty-row">No sites added yet.</td></tr>
+          <tr><td colspan="4" class="empty-row">No sites added yet.</td></tr>
         </tbody>
       </table>
     </div>
 
-    <button type="button" class="btn btn-submit" id="submitBtn" disabled>Submit</button>
-    <div class="alert success" id="successMsg">✓ Submitted successfully!</div>
+    <div class="save-required-note" id="saveRequiredNote">
+      ⚠️ <strong>You have unsaved changes.</strong> Click "Save &amp; Submit" below to save your updates. Nothing is saved until you submit.
+    </div>
+
+    <button type="button" class="btn btn-submit" id="submitBtn" disabled>Save &amp; Submit</button>
+    <div class="alert success" id="successMsg">✓ Saved successfully!</div>
     <div class="alert error" id="errorMsg"></div>
   </div>
 
@@ -283,14 +416,19 @@
     VIC: ["Dinesh", "Anish"]
   };
 
+  const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
   const stateEl = document.getElementById("state");
   const supEl = document.getElementById("supervisor");
   const siteNameEl = document.getElementById("siteName");
-  const siteFreqEl = document.getElementById("siteFreq");
-  const siteFreqOtherEl = document.getElementById("siteFreqOther");
-  const freqOtherField = document.getElementById("freqOtherField");
-  const daysField = document.getElementById("daysField");
-  const daysPicker = document.getElementById("daysPicker");
+  const scheduleGrid = document.getElementById("scheduleGrid");
+  const scheduleGridBody = document.getElementById("scheduleGridBody");
+  const scheduleSummary = document.getElementById("scheduleSummary");
+  const gridModeWrap = document.getElementById("gridModeWrap");
+  const customModeWrap = document.getElementById("customModeWrap");
+  const customFreqEl = document.getElementById("customFreq");
+  const gridModeLabel = document.getElementById("gridModeLabel");
+  const customModeLabel = document.getElementById("customModeLabel");
   const addSiteBtn = document.getElementById("addSiteBtn");
   const cancelEditBtn = document.getElementById("cancelEditBtn");
   const siteEntry = document.getElementById("siteEntry");
@@ -300,10 +438,118 @@
   const successMsg = document.getElementById("successMsg");
   const errorMsg = document.getElementById("errorMsg");
   const loadStatus = document.getElementById("loadStatus");
+  const saveRequiredNote = document.getElementById("saveRequiredNote");
 
   let sites = [];
   let editIndex = null;
-  let fetchRequestId = 0; // guards against stale responses
+  let fetchRequestId = 0;
+  let hasUnsavedChanges = false;
+
+  function markUnsaved() { hasUnsavedChanges = true; saveRequiredNote.classList.add("visible"); }
+  function markSaved() { hasUnsavedChanges = false; saveRequiredNote.classList.remove("visible"); }
+  window.addEventListener("beforeunload", (e) => { if (hasUnsavedChanges) { e.preventDefault(); e.returnValue = ""; } });
+
+  // ---------- Schedule mode toggle ----------
+  function getScheduleMode() {
+    return document.querySelector('input[name="scheduleType"]:checked').value;
+  }
+  function setScheduleMode(mode) {
+    document.querySelector('input[name="scheduleType"][value="' + mode + '"]').checked = true;
+    updateScheduleModeUI();
+  }
+  function updateScheduleModeUI() {
+    const mode = getScheduleMode();
+    gridModeWrap.style.display = mode === "grid" ? "block" : "none";
+    customModeWrap.style.display = mode === "custom" ? "block" : "none";
+    gridModeLabel.classList.toggle("active", mode === "grid");
+    customModeLabel.classList.toggle("active", mode === "custom");
+  }
+  document.querySelectorAll('input[name="scheduleType"]').forEach(r => {
+    r.addEventListener("change", updateScheduleModeUI);
+  });
+  // ------------------------------------------
+
+  // ---------- Schedule grid ----------
+  function buildScheduleGrid() {
+    scheduleGridBody.innerHTML = "";
+    for (let w = 1; w <= 4; w++) {
+      const tr = document.createElement("tr");
+      const th = document.createElement("th");
+      th.className = "row-label";
+      th.textContent = "Week " + w;
+      tr.appendChild(th);
+      DAYS.forEach(d => {
+        const td = document.createElement("td");
+        td.className = "schedule-cell";
+        td.dataset.week = w;
+        td.dataset.day = d;
+        td.title = "Week " + w + " • " + d;
+        td.addEventListener("click", () => {
+          td.classList.toggle("selected");
+          updateScheduleSummary();
+        });
+        tr.appendChild(td);
+      });
+      scheduleGridBody.appendChild(tr);
+    }
+    scheduleGrid.querySelectorAll(".day-header").forEach(th => {
+      th.addEventListener("click", () => {
+        const day = th.dataset.day;
+        const cells = scheduleGrid.querySelectorAll('.schedule-cell[data-day="' + day + '"]');
+        const allSelected = Array.from(cells).every(c => c.classList.contains("selected"));
+        cells.forEach(c => c.classList.toggle("selected", !allSelected));
+        updateScheduleSummary();
+      });
+    });
+  }
+  function getSelectedSchedule() {
+    return Array.from(scheduleGrid.querySelectorAll(".schedule-cell.selected"))
+      .map(c => "W" + c.dataset.week + "-" + c.dataset.day);
+  }
+  function setSelectedSchedule(scheduleArr) {
+    scheduleGrid.querySelectorAll(".schedule-cell").forEach(c => c.classList.remove("selected"));
+    (scheduleArr || []).forEach(cell => {
+      const m = cell.match(/^W(\d+)-(.+)$/);
+      if (!m) return;
+      const el = scheduleGrid.querySelector('.schedule-cell[data-week="' + m[1] + '"][data-day="' + m[2] + '"]');
+      if (el) el.classList.add("selected");
+    });
+    updateScheduleSummary();
+  }
+  function clearSchedule() {
+    scheduleGrid.querySelectorAll(".schedule-cell.selected").forEach(c => c.classList.remove("selected"));
+    updateScheduleSummary();
+  }
+  function updateScheduleSummary() {
+    const sel = getSelectedSchedule();
+    if (sel.length === 0) { scheduleSummary.classList.remove("visible"); return; }
+    scheduleSummary.textContent = "Pattern: " + describeSchedule(sel);
+    scheduleSummary.classList.add("visible");
+  }
+  function describeSchedule(schedule) {
+    if (!schedule || schedule.length === 0) return "—";
+    const byWeek = { 1: [], 2: [], 3: [], 4: [] };
+    schedule.forEach(cell => {
+      const m = cell.match(/^W(\d+)-(.+)$/);
+      if (m) byWeek[parseInt(m[1])].push(m[2]);
+    });
+    const dayCmp = (a, b) => DAYS.indexOf(a) - DAYS.indexOf(b);
+    const activeWeeks = [1, 2, 3, 4].filter(w => byWeek[w].length > 0);
+    const dayLists = activeWeeks.map(w => byWeek[w].slice().sort(dayCmp).join(","));
+    if (activeWeeks.length === 4 && new Set(dayLists).size === 1) {
+      return "Weekly: " + byWeek[1].slice().sort(dayCmp).join(", ");
+    }
+    if (activeWeeks.length === 2 && new Set(dayLists).size === 1) {
+      if ((activeWeeks[0] === 1 && activeWeeks[1] === 3) || (activeWeeks[0] === 2 && activeWeeks[1] === 4)) {
+        return "Fortnightly (Wk " + activeWeeks[0] + "+" + activeWeeks[1] + "): " + byWeek[activeWeeks[0]].slice().sort(dayCmp).join(", ");
+      }
+    }
+    if (activeWeeks.length === 1) {
+      return "Monthly (Wk " + activeWeeks[0] + "): " + byWeek[activeWeeks[0]].slice().sort(dayCmp).join(", ");
+    }
+    return "Custom: " + activeWeeks.map(w => "Wk" + w + " " + byWeek[w].slice().sort(dayCmp).join("/")).join(" • ");
+  }
+  // ---------- end schedule grid ----------
 
   stateEl.addEventListener("change", () => {
     const st = stateEl.value;
@@ -318,11 +564,11 @@
     } else {
       supEl.disabled = true;
     }
-    // Clear sites and status when state changes
     sites = [];
     resetEntryForm();
     refreshTable();
     setLoadStatus("");
+    markSaved();
     updateSubmitState();
   });
 
@@ -334,6 +580,7 @@
       resetEntryForm();
       refreshTable();
       setLoadStatus("");
+      markSaved();
       updateSubmitState();
     }
   });
@@ -350,32 +597,27 @@
   async function loadExistingSites(state, supervisor) {
     const reqId = ++fetchRequestId;
     setLoadStatus("loading");
-
-    // Reset local state before loading
     sites = [];
     resetEntryForm();
     refreshTable();
+    markSaved();
     updateSubmitState();
-
     try {
       const url = WEBHOOK_URL + "?state=" + encodeURIComponent(state) + "&supervisor=" + encodeURIComponent(supervisor);
       const res = await fetch(url, { method: "GET" });
       const data = await res.json();
-
-      // Ignore if a newer request has started
       if (reqId !== fetchRequestId) return;
-
       if (!data.success) {
         setLoadStatus("error", "Couldn't load previous sites: " + (data.error || "unknown error"));
         return;
       }
-
       if (data.sites && data.sites.length > 0) {
         sites = data.sites;
         refreshTable();
+        markSaved();
         updateSubmitState();
         const when = data.submittedAt ? new Date(data.submittedAt).toLocaleDateString() : "";
-        setLoadStatus("loaded", "✓ Loaded " + data.sites.length + " site" + (data.sites.length === 1 ? "" : "s") + (when ? " (last submitted " + when + ")" : ""));
+        setLoadStatus("loaded", "✓ Loaded " + data.sites.length + " site" + (data.sites.length === 1 ? "" : "s") + (when ? " (last saved " + when + ")" : ""));
       } else {
         setLoadStatus("empty", "No previous sites on record");
       }
@@ -385,22 +627,6 @@
     }
   }
 
-  daysPicker.querySelectorAll(".day-chip").forEach(chip => {
-    chip.addEventListener("click", () => chip.classList.toggle("selected"));
-  });
-
-  function updateFreqUI() {
-    const isOther = siteFreqEl.value === "Other";
-    freqOtherField.style.display = isOther ? "block" : "none";
-    daysField.style.display = isOther ? "none" : "block";
-    if (isOther) {
-      daysPicker.querySelectorAll(".day-chip.selected").forEach(c => c.classList.remove("selected"));
-    } else {
-      siteFreqOtherEl.value = "";
-    }
-  }
-  siteFreqEl.addEventListener("change", updateFreqUI);
-
   function escapeHtml(str) {
     return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
@@ -408,17 +634,20 @@
   function refreshTable() {
     tableBody.innerHTML = "";
     if (sites.length === 0) {
-      tableBody.innerHTML = '<tr><td colspan="5" class="empty-row">No sites added yet.</td></tr>';
+      tableBody.innerHTML = '<tr><td colspan="4" class="empty-row">No sites added yet.</td></tr>';
       return;
     }
     sites.forEach((s, i) => {
       const tr = document.createElement("tr");
       if (editIndex === i) tr.className = "editing-row";
+      // For custom-frequency entries, schedule[] is empty and pattern holds the user's text
+      const scheduleLabel = (s.schedule && s.schedule.length > 0)
+        ? describeSchedule(s.schedule)
+        : (s.pattern || "—");
       tr.innerHTML = `
         <td>${i + 1}</td>
         <td>${escapeHtml(s.siteName)}</td>
-        <td>${escapeHtml(s.frequency)}</td>
-        <td>${s.days.length ? s.days.join(", ") : "—"}</td>
+        <td>${escapeHtml(scheduleLabel)}</td>
         <td class="row-actions">
           <button type="button" class="btn-link btn-edit" data-edit="${i}">Edit</button>
           <button type="button" class="btn-link btn-remove" data-remove="${i}">Remove</button>
@@ -432,9 +661,11 @@
     tableBody.querySelectorAll(".btn-remove").forEach(b => {
       b.addEventListener("click", () => {
         const i = parseInt(b.dataset.remove);
+        if (!confirm('Remove "' + sites[i].siteName + '" from the list? (You\'ll still need to click Save & Submit to save this change.)')) return;
         sites.splice(i, 1);
         if (editIndex === i) resetEntryForm();
         else if (editIndex !== null && i < editIndex) editIndex--;
+        markUnsaved();
         refreshTable();
         updateSubmitState();
       });
@@ -458,10 +689,9 @@
   function resetEntryForm() {
     editIndex = null;
     siteNameEl.value = "";
-    siteFreqEl.value = "";
-    siteFreqOtherEl.value = "";
-    daysPicker.querySelectorAll(".day-chip.selected").forEach(c => c.classList.remove("selected"));
-    updateFreqUI();
+    clearSchedule();
+    customFreqEl.value = "";
+    setScheduleMode("grid");
     siteEntry.classList.remove("editing");
     siteFormTitle.textContent = "Add a Site";
     addSiteBtn.textContent = "+ Add Site to List";
@@ -471,18 +701,16 @@
     const s = sites[i];
     editIndex = i;
     siteNameEl.value = s.siteName;
-    const knownFreqs = ["Weekly", "Fortnightly", "Monthly"];
-    if (knownFreqs.includes(s.frequency)) {
-      siteFreqEl.value = s.frequency;
-      siteFreqOtherEl.value = "";
+    const hasSchedule = s.schedule && s.schedule.length > 0;
+    if (hasSchedule) {
+      setScheduleMode("grid");
+      setSelectedSchedule(s.schedule);
+      customFreqEl.value = "";
     } else {
-      siteFreqEl.value = "Other";
-      siteFreqOtherEl.value = s.frequency;
+      setScheduleMode("custom");
+      clearSchedule();
+      customFreqEl.value = s.pattern || "";
     }
-    updateFreqUI();
-    daysPicker.querySelectorAll(".day-chip").forEach(c => {
-      c.classList.toggle("selected", s.days.includes(c.dataset.day));
-    });
     siteEntry.classList.add("editing");
     siteFormTitle.textContent = `Edit Site #${i + 1}`;
     addSiteBtn.textContent = "Save Changes";
@@ -499,23 +727,23 @@
 
   addSiteBtn.addEventListener("click", () => {
     const name = siteNameEl.value.trim();
-    const freqChoice = siteFreqEl.value;
-    const freqOther = siteFreqOtherEl.value.trim();
-    const selectedDays = Array.from(daysPicker.querySelectorAll(".day-chip.selected")).map(c => c.dataset.day);
-
     if (!name) { alert("Please enter a site name."); return; }
-    if (!freqChoice) { alert("Please select a frequency."); return; }
-    if (freqChoice === "Other" && !freqOther) { alert("Please specify the frequency."); return; }
-    if (freqChoice !== "Other" && selectedDays.length === 0) {
-      alert("Please select at least one day.");
-      return;
+
+    const mode = getScheduleMode();
+    let record;
+    if (mode === "custom") {
+      const customText = customFreqEl.value.trim();
+      if (!customText) { alert("Please enter a custom frequency."); return; }
+      record = { siteName: name, schedule: [], pattern: customText };
+    } else {
+      const schedule = getSelectedSchedule();
+      if (schedule.length === 0) { alert("Please tick at least one day in the schedule grid, or switch to Custom frequency."); return; }
+      record = { siteName: name, schedule: schedule, pattern: describeSchedule(schedule) };
     }
 
-    const finalFreq = freqChoice === "Other" ? freqOther : freqChoice;
-    const finalDays = freqChoice === "Other" ? [] : selectedDays;
-    const record = { siteName: name, frequency: finalFreq, days: finalDays };
     if (editIndex !== null) sites[editIndex] = record;
     else sites.push(record);
+    markUnsaved();
     resetEntryForm();
     refreshTable();
     updateSubmitState();
@@ -528,7 +756,6 @@
     successMsg.style.display = "none";
     setTimeout(() => errorMsg.style.display = "none", 6000);
   }
-
   function showSuccess() {
     successMsg.style.display = "block";
     errorMsg.style.display = "none";
@@ -540,18 +767,15 @@
       showError("Webhook URL is not configured. Please set WEBHOOK_URL in the code.");
       return;
     }
-
     const payload = {
       state: stateEl.value,
       supervisor: supEl.value,
       sites,
       submittedAt: new Date().toISOString()
     };
-
     submitBtn.disabled = true;
     const originalText = submitBtn.textContent;
-    submitBtn.innerHTML = '<span class="spinner"></span>Submitting...';
-
+    submitBtn.innerHTML = '<span class="spinner"></span>Saving...';
     try {
       await fetch(WEBHOOK_URL, {
         method: "POST",
@@ -560,6 +784,7 @@
         body: JSON.stringify(payload)
       });
       showSuccess();
+      markSaved();
       stateEl.value = "";
       supEl.innerHTML = '<option value="">-- Select state first --</option>';
       supEl.disabled = true;
@@ -568,12 +793,14 @@
       refreshTable();
       setLoadStatus("");
     } catch (err) {
-      showError("Submission failed: " + err.message);
+      showError("Save failed: " + err.message);
     } finally {
       submitBtn.textContent = originalText;
       updateSubmitState();
     }
   });
+
+  buildScheduleGrid();
 </script>
 </body>
 </html>
