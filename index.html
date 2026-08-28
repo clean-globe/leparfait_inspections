@@ -47,6 +47,23 @@
     box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
   }
   .field { margin-bottom: 18px; }
+  .hint {
+    font-size: 13px;
+    color: #6b7280;
+    margin-top: 6px;
+  }
+  .hint.loading::before {
+    content: "";
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid #6b7280;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin-right: 6px;
+    vertical-align: -2px;
+  }
   .site-entry {
     border: 1px solid #e5e7eb;
     border-radius: 10px;
@@ -171,7 +188,7 @@
 <body>
   <div class="container">
     <h1>Site Inspection Setup</h1>
-    <p class="subtitle">Enter your details, add the sites you inspect, then submit.</p>
+    <p class="subtitle">Select your state and name to view and update your sites.</p>
 
     <div class="field">
       <label for="state">State</label>
@@ -190,11 +207,7 @@
       <select id="supervisor" required disabled>
         <option value="">-- Select state first --</option>
       </select>
-    </div>
-
-    <div class="field">
-      <label for="email">Your Email Address</label>
-      <input type="email" id="email" required placeholder="you@example.com" />
+      <div class="hint" id="loadingSites" style="display:none;">Loading your saved sites...</div>
     </div>
 
     <h2 id="siteFormTitle">Add a Site</h2>
@@ -247,7 +260,7 @@
           </tr>
         </thead>
         <tbody id="sitesTableBody">
-          <tr><td colspan="5" class="empty-row">No sites added yet.</td></tr>
+          <tr><td colspan="5" class="empty-row">Select a state and supervisor to view sites.</td></tr>
         </tbody>
       </table>
     </div>
@@ -274,7 +287,6 @@
 
   const stateEl = document.getElementById("state");
   const supEl = document.getElementById("supervisor");
-  const emailEl = document.getElementById("email");
   const siteNameEl = document.getElementById("siteName");
   const siteFreqEl = document.getElementById("siteFreq");
   const siteFreqOtherEl = document.getElementById("siteFreqOther");
@@ -289,9 +301,14 @@
   const submitBtn = document.getElementById("submitBtn");
   const successMsg = document.getElementById("successMsg");
   const errorMsg = document.getElementById("errorMsg");
+  const loadingSites = document.getElementById("loadingSites");
 
   let sites = [];
   let editIndex = null;
+
+  function setEmptyRowMessage(msg) {
+    tableBody.innerHTML = `<tr><td colspan="5" class="empty-row">${msg}</td></tr>`;
+  }
 
   stateEl.addEventListener("change", () => {
     const st = stateEl.value;
@@ -306,7 +323,44 @@
     } else {
       supEl.disabled = true;
     }
+    sites = [];
+    resetEntryForm();
+    setEmptyRowMessage("Select a supervisor to view sites.");
     updateSubmitState();
+  });
+
+  // Fetch existing sites when supervisor is chosen
+  supEl.addEventListener("change", async () => {
+    const st = stateEl.value;
+    const sup = supEl.value;
+    resetEntryForm();
+    if (!st || !sup) {
+      sites = [];
+      setEmptyRowMessage("Select a supervisor to view sites.");
+      updateSubmitState();
+      return;
+    }
+    loadingSites.style.display = "block";
+    loadingSites.classList.add("loading");
+    setEmptyRowMessage("Loading...");
+    try {
+      const url = `${WEBHOOK_URL}?state=${encodeURIComponent(st)}&supervisor=${encodeURIComponent(sup)}`;
+      const res = await fetch(url, { method: "GET" });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.sites)) {
+        sites = data.sites;
+      } else {
+        sites = [];
+      }
+    } catch (err) {
+      showError("Could not load saved sites: " + err.message);
+      sites = [];
+    } finally {
+      loadingSites.style.display = "none";
+      loadingSites.classList.remove("loading");
+      refreshTable();
+      updateSubmitState();
+    }
   });
 
   daysPicker.querySelectorAll(".day-chip").forEach(chip => {
@@ -318,7 +372,6 @@
     freqOtherField.style.display = isOther ? "block" : "none";
     daysField.style.display = isOther ? "none" : "block";
     if (isOther) {
-      // clear day selections since they won't be used
       daysPicker.querySelectorAll(".day-chip.selected").forEach(c => c.classList.remove("selected"));
     } else {
       siteFreqOtherEl.value = "";
@@ -333,7 +386,11 @@
   function refreshTable() {
     tableBody.innerHTML = "";
     if (sites.length === 0) {
-      tableBody.innerHTML = '<tr><td colspan="5" class="empty-row">No sites added yet.</td></tr>';
+      if (stateEl.value && supEl.value) {
+        setEmptyRowMessage("No sites added yet.");
+      } else {
+        setEmptyRowMessage("Select a state and supervisor to view sites.");
+      }
       return;
     }
     sites.forEach((s, i) => {
@@ -368,18 +425,11 @@
 
   function updateSubmitState() {
     submitBtn.disabled = !(
-      emailEl.value.trim() &&
       stateEl.value &&
       supEl.value &&
-      sites.length > 0 &&
       editIndex === null
     );
   }
-
-  [emailEl, stateEl, supEl].forEach(el => {
-    el.addEventListener("input", updateSubmitState);
-    el.addEventListener("change", updateSubmitState);
-  });
 
   function resetEntryForm() {
     editIndex = null;
@@ -468,7 +518,6 @@
     }
 
     const payload = {
-      email: emailEl.value.trim(),
       state: stateEl.value,
       supervisor: supEl.value,
       sites,
@@ -487,15 +536,8 @@
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(payload)
       });
-      // no-cors means we can't read the response, but if fetch didn't throw, it went through
       showSuccess();
-      emailEl.value = "";
-      stateEl.value = "";
-      supEl.innerHTML = '<option value="">-- Select state first --</option>';
-      supEl.disabled = true;
-      sites = [];
-      resetEntryForm();
-      refreshTable();
+      // Keep state/supervisor selected so the user sees their updated list
     } catch (err) {
       showError("Submission failed: " + err.message);
     } finally {
