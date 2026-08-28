@@ -22,7 +22,7 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   }
   h1 { margin: 0 0 6px; font-size: 22px; }
-  h2 { font-size: 16px; margin: 24px 0 12px; color: #111827; }
+  h2 { font-size: 16px; margin: 24px 0 12px; color: #111827; display: flex; align-items: center; gap: 8px; }
   p.subtitle { margin: 0 0 24px; color: #6b7280; font-size: 14px; }
   label {
     display: block;
@@ -32,7 +32,6 @@
     color: #374151;
   }
   input[type="text"],
-  input[type="email"],
   select {
     width: 100%;
     padding: 10px 12px;
@@ -47,23 +46,6 @@
     box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
   }
   .field { margin-bottom: 18px; }
-  .hint {
-    font-size: 13px;
-    color: #6b7280;
-    margin-top: 6px;
-  }
-  .hint.loading::before {
-    content: "";
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    border: 2px solid #6b7280;
-    border-top-color: transparent;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    margin-right: 6px;
-    vertical-align: -2px;
-  }
   .site-entry {
     border: 1px solid #e5e7eb;
     border-radius: 10px;
@@ -182,13 +164,27 @@
     vertical-align: middle;
     margin-right: 6px;
   }
+  .spinner-dark {
+    border-color: #6b7280;
+    border-top-color: transparent;
+  }
   @keyframes spin { to { transform: rotate(360deg); } }
+  .load-status {
+    font-size: 13px;
+    color: #6b7280;
+    font-weight: 500;
+    display: none;
+  }
+  .load-status.loading { display: inline-flex; align-items: center; gap: 6px; color: #2563eb; }
+  .load-status.loaded { display: inline; color: #059669; }
+  .load-status.empty { display: inline; color: #6b7280; font-style: italic; }
+  .load-status.error { display: inline; color: #dc2626; }
 </style>
 </head>
 <body>
   <div class="container">
     <h1>Site Inspection Setup</h1>
-    <p class="subtitle">Select your state and name to view and update your sites.</p>
+    <p class="subtitle">Enter your details, add the sites you inspect, then submit.</p>
 
     <div class="field">
       <label for="state">State</label>
@@ -207,7 +203,6 @@
       <select id="supervisor" required disabled>
         <option value="">-- Select state first --</option>
       </select>
-      <div class="hint" id="loadingSites" style="display:none;">Loading your saved sites...</div>
     </div>
 
     <h2 id="siteFormTitle">Add a Site</h2>
@@ -247,7 +242,10 @@
       <button type="button" class="btn btn-cancel" id="cancelEditBtn">Cancel Edit</button>
     </div>
 
-    <h2>Sites Added</h2>
+    <h2>
+      Sites Added
+      <span class="load-status" id="loadStatus"></span>
+    </h2>
     <div class="table-wrap">
       <table id="sitesTable">
         <thead>
@@ -260,7 +258,7 @@
           </tr>
         </thead>
         <tbody id="sitesTableBody">
-          <tr><td colspan="5" class="empty-row">Select a state and supervisor to view sites.</td></tr>
+          <tr><td colspan="5" class="empty-row">No sites added yet.</td></tr>
         </tbody>
       </table>
     </div>
@@ -301,14 +299,11 @@
   const submitBtn = document.getElementById("submitBtn");
   const successMsg = document.getElementById("successMsg");
   const errorMsg = document.getElementById("errorMsg");
-  const loadingSites = document.getElementById("loadingSites");
+  const loadStatus = document.getElementById("loadStatus");
 
   let sites = [];
   let editIndex = null;
-
-  function setEmptyRowMessage(msg) {
-    tableBody.innerHTML = `<tr><td colspan="5" class="empty-row">${msg}</td></tr>`;
-  }
+  let fetchRequestId = 0; // guards against stale responses
 
   stateEl.addEventListener("change", () => {
     const st = stateEl.value;
@@ -323,45 +318,72 @@
     } else {
       supEl.disabled = true;
     }
+    // Clear sites and status when state changes
     sites = [];
     resetEntryForm();
-    setEmptyRowMessage("Select a supervisor to view sites.");
+    refreshTable();
+    setLoadStatus("");
     updateSubmitState();
   });
 
-  // Fetch existing sites when supervisor is chosen
-  supEl.addEventListener("change", async () => {
-    const st = stateEl.value;
-    const sup = supEl.value;
-    resetEntryForm();
-    if (!st || !sup) {
+  supEl.addEventListener("change", () => {
+    if (stateEl.value && supEl.value) {
+      loadExistingSites(stateEl.value, supEl.value);
+    } else {
       sites = [];
-      setEmptyRowMessage("Select a supervisor to view sites.");
-      updateSubmitState();
-      return;
-    }
-    loadingSites.style.display = "block";
-    loadingSites.classList.add("loading");
-    setEmptyRowMessage("Loading...");
-    try {
-      const url = `${WEBHOOK_URL}?state=${encodeURIComponent(st)}&supervisor=${encodeURIComponent(sup)}`;
-      const res = await fetch(url, { method: "GET" });
-      const data = await res.json();
-      if (data.success && Array.isArray(data.sites)) {
-        sites = data.sites;
-      } else {
-        sites = [];
-      }
-    } catch (err) {
-      showError("Could not load saved sites: " + err.message);
-      sites = [];
-    } finally {
-      loadingSites.style.display = "none";
-      loadingSites.classList.remove("loading");
+      resetEntryForm();
       refreshTable();
+      setLoadStatus("");
       updateSubmitState();
     }
   });
+
+  function setLoadStatus(state, text) {
+    loadStatus.className = "load-status" + (state ? " " + state : "");
+    if (state === "loading") {
+      loadStatus.innerHTML = '<span class="spinner spinner-dark"></span>Loading previous sites...';
+    } else {
+      loadStatus.textContent = text || "";
+    }
+  }
+
+  async function loadExistingSites(state, supervisor) {
+    const reqId = ++fetchRequestId;
+    setLoadStatus("loading");
+
+    // Reset local state before loading
+    sites = [];
+    resetEntryForm();
+    refreshTable();
+    updateSubmitState();
+
+    try {
+      const url = WEBHOOK_URL + "?state=" + encodeURIComponent(state) + "&supervisor=" + encodeURIComponent(supervisor);
+      const res = await fetch(url, { method: "GET" });
+      const data = await res.json();
+
+      // Ignore if a newer request has started
+      if (reqId !== fetchRequestId) return;
+
+      if (!data.success) {
+        setLoadStatus("error", "Couldn't load previous sites: " + (data.error || "unknown error"));
+        return;
+      }
+
+      if (data.sites && data.sites.length > 0) {
+        sites = data.sites;
+        refreshTable();
+        updateSubmitState();
+        const when = data.submittedAt ? new Date(data.submittedAt).toLocaleDateString() : "";
+        setLoadStatus("loaded", "✓ Loaded " + data.sites.length + " site" + (data.sites.length === 1 ? "" : "s") + (when ? " (last submitted " + when + ")" : ""));
+      } else {
+        setLoadStatus("empty", "No previous sites on record");
+      }
+    } catch (err) {
+      if (reqId !== fetchRequestId) return;
+      setLoadStatus("error", "Failed to load previous sites: " + err.message);
+    }
+  }
 
   daysPicker.querySelectorAll(".day-chip").forEach(chip => {
     chip.addEventListener("click", () => chip.classList.toggle("selected"));
@@ -386,11 +408,7 @@
   function refreshTable() {
     tableBody.innerHTML = "";
     if (sites.length === 0) {
-      if (stateEl.value && supEl.value) {
-        setEmptyRowMessage("No sites added yet.");
-      } else {
-        setEmptyRowMessage("Select a state and supervisor to view sites.");
-      }
+      tableBody.innerHTML = '<tr><td colspan="5" class="empty-row">No sites added yet.</td></tr>';
       return;
     }
     sites.forEach((s, i) => {
@@ -427,9 +445,15 @@
     submitBtn.disabled = !(
       stateEl.value &&
       supEl.value &&
+      sites.length > 0 &&
       editIndex === null
     );
   }
+
+  [stateEl, supEl].forEach(el => {
+    el.addEventListener("input", updateSubmitState);
+    el.addEventListener("change", updateSubmitState);
+  });
 
   function resetEntryForm() {
     editIndex = null;
@@ -529,7 +553,6 @@
     submitBtn.innerHTML = '<span class="spinner"></span>Submitting...';
 
     try {
-      // Apps Script web apps require text/plain to avoid CORS preflight
       await fetch(WEBHOOK_URL, {
         method: "POST",
         mode: "no-cors",
@@ -537,7 +560,13 @@
         body: JSON.stringify(payload)
       });
       showSuccess();
-      // Keep state/supervisor selected so the user sees their updated list
+      stateEl.value = "";
+      supEl.innerHTML = '<option value="">-- Select state first --</option>';
+      supEl.disabled = true;
+      sites = [];
+      resetEntryForm();
+      refreshTable();
+      setLoadStatus("");
     } catch (err) {
       showError("Submission failed: " + err.message);
     } finally {
