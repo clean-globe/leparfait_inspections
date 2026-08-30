@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Site Inspection Setup</title>
+<title>Site Inspection Details</title>
 <style>
   * { box-sizing: border-box; }
   body {
@@ -216,22 +216,33 @@
     text-align: right;
   }
   .reveal-toggle {
-    background: transparent;
-    border: 1px solid transparent;
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
     border-radius: 6px;
     cursor: pointer;
-    padding: 6px 8px;
-    font-size: 14px;
-    color: #6b7280;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    font-size: 15px;
+    color: #374151;
     line-height: 1;
-    transition: transform 0.25s ease, background 0.15s, color 0.15s, border-color 0.15s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.25s ease, background 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s;
   }
-  .reveal-toggle:hover { background: #f3f4f6; color: #374151; border-color: #e5e7eb; }
+  .reveal-toggle:hover {
+    background: #e0e7ff;
+    color: #1e40af;
+    border-color: #a5b4fc;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
   .actions-slot.open .reveal-toggle {
     transform: rotate(180deg);
-    background: #eff6ff;
-    color: #1e40af;
-    border-color: #bfdbfe;
+    background: #2563eb;
+    color: #fff;
+    border-color: #1d4ed8;
+    box-shadow: 0 2px 6px rgba(37,99,235,0.3);
   }
   .actions-slide-panel {
     position: absolute;
@@ -445,7 +456,7 @@
 <body>
   <header class="topbar">
     <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">☰</button>
-    <div class="brand">Le Parfait Inspections</div>
+    <div class="brand">Le Parfait</div>
   </header>
 
   <div class="layout">
@@ -457,7 +468,7 @@
         </a>
         <a class="nav-item active" data-view="siteInspectionSetup">
           <span class="nav-icon">📅</span>
-          <span>Site Inspection Setup</span>
+          <span>Site Inspection Details</span>
         </a>
         <a class="nav-item" data-view="testAndTags">
           <span class="nav-icon">🏷️</span>
@@ -483,12 +494,8 @@
 
       <div class="view active" id="view-siteInspectionSetup">
         <div class="container">
-          <h1>Site Inspection Setup</h1>
+          <h1>Site Inspection Details</h1>
           <p class="subtitle">Select your state and name, then add the sites you inspect.</p>
-
-          <div class="info-notice">
-            ℹ️ <strong>Changes are saved automatically.</strong> Each time you add, edit, or remove a site, the change is written to the spreadsheet immediately — no separate submit step.
-          </div>
 
           <div class="field">
             <label for="state">State</label>
