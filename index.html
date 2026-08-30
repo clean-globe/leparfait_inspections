@@ -821,7 +821,7 @@
         sites = data.sites;
         refreshTable();
         const when = data.submittedAt ? new Date(data.submittedAt).toLocaleDateString() : "";
-        setLoadStatus() + (when ? " Last saved " + when + ")" : ""));
+         setLoadStatus("loaded", "✓ Loaded " + data.sites.length + " site" + (data.sites.length === 1 ? "" : "s") + (when ? " (last saved " + when + ")" : ""));
       } else {
         setLoadStatus("empty", "No previous sites on record");
       }
