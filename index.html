@@ -187,7 +187,6 @@
   .save-required-note.visible { display: block; }
   .save-required-note strong { color: #78350f; }
 
-  /* Schedule mode toggle */
   .schedule-type-toggle {
     display: flex;
     gap: 8px;
@@ -216,7 +215,6 @@
   .radio-label input[type="radio"] { cursor: pointer; margin: 0; accent-color: #2563eb; }
   .radio-label.active { border-color: #2563eb; background: #eff6ff; color: #1e40af !important; font-weight: 600 !important; }
 
-  /* Schedule grid */
   .grid-hint {
     font-size: 12px;
     color: #6b7280;
@@ -262,15 +260,8 @@
     background: #fff;
     transition: all 0.12s;
   }
-  .schedule-cell:hover {
-    border-color: #2563eb;
-    background: #eff6ff;
-  }
-  .schedule-cell.selected {
-    background: #2563eb;
-    border-color: #2563eb;
-    position: relative;
-  }
+  .schedule-cell:hover { border-color: #2563eb; background: #eff6ff; }
+  .schedule-cell.selected { background: #2563eb; border-color: #2563eb; position: relative; }
   .schedule-cell.selected::after {
     content: "✓";
     color: #fff;
@@ -288,6 +279,7 @@
     background: #f3f4f6;
     border-radius: 6px;
     display: none;
+    word-break: break-word;
   }
   .schedule-summary.visible { display: block; }
 </style>
@@ -341,7 +333,7 @@
         <div id="gridModeWrap">
           <p class="grid-hint">
             Tick the days this site is inspected across a 4-week cycle. The pattern repeats every 4 weeks.<br/>
-            <strong>Tip:</strong> click a day header (Mon, Tue…) to toggle that column across all weeks — quick way to set "Weekly".
+            <strong>Tip:</strong> click a day header (Mon, Tue…) to toggle that column across all weeks.
           </p>
           <div class="schedule-grid-wrap">
             <table class="schedule-grid" id="scheduleGrid">
@@ -405,7 +397,8 @@
   // ============================================================
   //  PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL BELOW
   // ============================================================
-const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbycYPQAKkiCq-7Jm2u0Y2ahpfmZJka5rxnqubbs39ODgaL6tMLNZ_lYlgfKGnvn-ZmZhg/exec";  // ============================================================
+  const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbycYPQAKkiCq-7Jm2u0Y2ahpfmZJka5rxnqubbs39ODgaL6tMLNZ_lYlgfKGnvn-ZmZhg/exec";
+  // ============================================================
 
   const supervisorsByState = {
     WA: ["Janith", "Madushanka", "MJ"],
@@ -416,6 +409,7 @@ const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbycYPQAKkiCq-7Jm2u0
   };
 
   const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const GRID_CELL_REGEX = /^Week (\d+) - (Mon|Tue|Wed|Thu|Fri|Sat|Sun)$/;
 
   const stateEl = document.getElementById("state");
   const supEl = document.getElementById("supervisor");
@@ -449,9 +443,7 @@ const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbycYPQAKkiCq-7Jm2u0
   window.addEventListener("beforeunload", (e) => { if (hasUnsavedChanges) { e.preventDefault(); e.returnValue = ""; } });
 
   // ---------- Schedule mode toggle ----------
-  function getScheduleMode() {
-    return document.querySelector('input[name="scheduleType"]:checked').value;
-  }
+  function getScheduleMode() { return document.querySelector('input[name="scheduleType"]:checked').value; }
   function setScheduleMode(mode) {
     document.querySelector('input[name="scheduleType"][value="' + mode + '"]').checked = true;
     updateScheduleModeUI();
@@ -482,7 +474,7 @@ const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbycYPQAKkiCq-7Jm2u0
         td.className = "schedule-cell";
         td.dataset.week = w;
         td.dataset.day = d;
-        td.title = "Week " + w + " • " + d;
+        td.title = "Week " + w + " - " + d;
         td.addEventListener("click", () => {
           td.classList.toggle("selected");
           updateScheduleSummary();
@@ -501,52 +493,54 @@ const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbycYPQAKkiCq-7Jm2u0
       });
     });
   }
-  function getSelectedSchedule() {
-    return Array.from(scheduleGrid.querySelectorAll(".schedule-cell.selected"))
-      .map(c => "W" + c.dataset.week + "-" + c.dataset.day);
+
+  // Returns list of "Week N - Day" strings, in week-then-day order
+  function getSelectedScheduleCells() {
+    const cells = [];
+    for (let w = 1; w <= 4; w++) {
+      DAYS.forEach(d => {
+        const el = scheduleGrid.querySelector('.schedule-cell.selected[data-week="' + w + '"][data-day="' + d + '"]');
+        if (el) cells.push("Week " + w + " - " + d);
+      });
+    }
+    return cells;
   }
-  function setSelectedSchedule(scheduleArr) {
+
+  // Try to parse a schedule string as a set of grid cells.
+  // Returns array of {week, day} on success, or null if any part doesn't match.
+  function parseAsGridSchedule(scheduleStr) {
+    if (!scheduleStr) return null;
+    const parts = scheduleStr.split(",").map(s => s.trim()).filter(Boolean);
+    if (parts.length === 0) return null;
+    const cells = [];
+    for (const part of parts) {
+      const m = part.match(GRID_CELL_REGEX);
+      if (!m) return null;
+      cells.push({ week: parseInt(m[1]), day: m[2] });
+    }
+    return cells;
+  }
+
+  function setSelectedScheduleFromString(scheduleStr) {
     scheduleGrid.querySelectorAll(".schedule-cell").forEach(c => c.classList.remove("selected"));
-    (scheduleArr || []).forEach(cell => {
-      const m = cell.match(/^W(\d+)-(.+)$/);
-      if (!m) return;
-      const el = scheduleGrid.querySelector('.schedule-cell[data-week="' + m[1] + '"][data-day="' + m[2] + '"]');
+    const cells = parseAsGridSchedule(scheduleStr) || [];
+    cells.forEach(({ week, day }) => {
+      const el = scheduleGrid.querySelector('.schedule-cell[data-week="' + week + '"][data-day="' + day + '"]');
       if (el) el.classList.add("selected");
     });
     updateScheduleSummary();
   }
+
   function clearSchedule() {
     scheduleGrid.querySelectorAll(".schedule-cell.selected").forEach(c => c.classList.remove("selected"));
     updateScheduleSummary();
   }
+
   function updateScheduleSummary() {
-    const sel = getSelectedSchedule();
-    if (sel.length === 0) { scheduleSummary.classList.remove("visible"); return; }
-    scheduleSummary.textContent = "Pattern: " + describeSchedule(sel);
+    const cells = getSelectedScheduleCells();
+    if (cells.length === 0) { scheduleSummary.classList.remove("visible"); return; }
+    scheduleSummary.textContent = "Schedule: " + cells.join(", ");
     scheduleSummary.classList.add("visible");
-  }
-  function describeSchedule(schedule) {
-    if (!schedule || schedule.length === 0) return "—";
-    const byWeek = { 1: [], 2: [], 3: [], 4: [] };
-    schedule.forEach(cell => {
-      const m = cell.match(/^W(\d+)-(.+)$/);
-      if (m) byWeek[parseInt(m[1])].push(m[2]);
-    });
-    const dayCmp = (a, b) => DAYS.indexOf(a) - DAYS.indexOf(b);
-    const activeWeeks = [1, 2, 3, 4].filter(w => byWeek[w].length > 0);
-    const dayLists = activeWeeks.map(w => byWeek[w].slice().sort(dayCmp).join(","));
-    if (activeWeeks.length === 4 && new Set(dayLists).size === 1) {
-      return "Weekly: " + byWeek[1].slice().sort(dayCmp).join(", ");
-    }
-    if (activeWeeks.length === 2 && new Set(dayLists).size === 1) {
-      if ((activeWeeks[0] === 1 && activeWeeks[1] === 3) || (activeWeeks[0] === 2 && activeWeeks[1] === 4)) {
-        return "Fortnightly (Wk " + activeWeeks[0] + "+" + activeWeeks[1] + "): " + byWeek[activeWeeks[0]].slice().sort(dayCmp).join(", ");
-      }
-    }
-    if (activeWeeks.length === 1) {
-      return "Monthly (Wk " + activeWeeks[0] + "): " + byWeek[activeWeeks[0]].slice().sort(dayCmp).join(", ");
-    }
-    return "Custom: " + activeWeeks.map(w => "Wk" + w + " " + byWeek[w].slice().sort(dayCmp).join("/")).join(" • ");
   }
   // ---------- end schedule grid ----------
 
@@ -639,10 +633,7 @@ const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbycYPQAKkiCq-7Jm2u0
     sites.forEach((s, i) => {
       const tr = document.createElement("tr");
       if (editIndex === i) tr.className = "editing-row";
-      // For custom-frequency entries, schedule[] is empty and pattern holds the user's text
-      const scheduleLabel = (s.schedule && s.schedule.length > 0)
-        ? describeSchedule(s.schedule)
-        : (s.pattern || "—");
+      const scheduleLabel = s.schedule || "—";
       tr.innerHTML = `
         <td>${i + 1}</td>
         <td>${escapeHtml(s.siteName)}</td>
@@ -700,15 +691,16 @@ const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbycYPQAKkiCq-7Jm2u0
     const s = sites[i];
     editIndex = i;
     siteNameEl.value = s.siteName;
-    const hasSchedule = s.schedule && s.schedule.length > 0;
-    if (hasSchedule) {
+    // If schedule string parses cleanly as grid cells, load into grid; else load as custom text
+    const gridCells = parseAsGridSchedule(s.schedule);
+    if (gridCells && gridCells.length > 0) {
       setScheduleMode("grid");
-      setSelectedSchedule(s.schedule);
+      setSelectedScheduleFromString(s.schedule);
       customFreqEl.value = "";
     } else {
       setScheduleMode("custom");
       clearSchedule();
-      customFreqEl.value = s.pattern || "";
+      customFreqEl.value = s.schedule || "";
     }
     siteEntry.classList.add("editing");
     siteFormTitle.textContent = `Edit Site #${i + 1}`;
@@ -729,17 +721,17 @@ const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbycYPQAKkiCq-7Jm2u0
     if (!name) { alert("Please enter a site name."); return; }
 
     const mode = getScheduleMode();
-    let record;
+    let schedule;
     if (mode === "custom") {
-      const customText = customFreqEl.value.trim();
-      if (!customText) { alert("Please enter a custom frequency."); return; }
-      record = { siteName: name, schedule: [], pattern: customText };
+      schedule = customFreqEl.value.trim();
+      if (!schedule) { alert("Please enter a custom frequency."); return; }
     } else {
-      const schedule = getSelectedSchedule();
-      if (schedule.length === 0) { alert("Please tick at least one day in the schedule grid, or switch to Custom frequency."); return; }
-      record = { siteName: name, schedule: schedule, pattern: describeSchedule(schedule) };
+      const cells = getSelectedScheduleCells();
+      if (cells.length === 0) { alert("Please tick at least one day in the schedule grid, or switch to Custom frequency."); return; }
+      schedule = cells.join(", ");
     }
 
+    const record = { siteName: name, schedule: schedule };
     if (editIndex !== null) sites[editIndex] = record;
     else sites.push(record);
     markUnsaved();
