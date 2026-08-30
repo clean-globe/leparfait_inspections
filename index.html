@@ -81,11 +81,9 @@
   .nav-item:hover { background: #f3f4f6; color: #111827; }
   .nav-item.active { background: #eff6ff; color: #1e40af; font-weight: 600; }
   .nav-icon { font-size: 18px; width: 20px; text-align: center; }
-  /* Main content area */
   .main { flex: 1; margin-left: 240px; min-width: 0; }
   .view { display: none; padding: 24px; }
   .view.active { display: block; }
-  /* Mobile overlay */
   .overlay {
     display: none;
     position: fixed;
@@ -95,7 +93,6 @@
     z-index: 140;
   }
   .overlay.visible { display: block; }
-  /* Mobile responsive */
   @media (max-width: 767px) {
     .menu-toggle { display: block; }
     .sidebar {
@@ -116,7 +113,7 @@
   }
   h1 { margin: 0 0 6px; font-size: 22px; }
   h2 { font-size: 16px; margin: 24px 0 12px; color: #111827; display: flex; align-items: center; gap: 8px; }
-  p.subtitle { margin: 0 0 24px; color: #6b7280; font-size: 14px; }
+  p.subtitle { margin: 0 0 20px; color: #6b7280; font-size: 14px; }
   label {
     display: block;
     font-weight: 600;
@@ -124,8 +121,7 @@
     margin-bottom: 6px;
     color: #374151;
   }
-  input[type="text"],
-  select {
+  input[type="text"], select {
     width: 100%;
     padding: 10px 12px;
     border: 1px solid #d1d5db;
@@ -165,38 +161,45 @@
     font-weight: 600;
     cursor: pointer;
     border: none;
+    transition: all 0.15s;
   }
+  .btn:disabled { cursor: not-allowed; opacity: 0.6; }
   .btn-add { background: #10b981; color: #fff; width: 100%; padding: 11px; }
-  .btn-add:hover { background: #059669; }
+  .btn-add:hover:not(:disabled) { background: #059669; }
   .btn-cancel {
     background: #e5e7eb;
     color: #374151;
     width: 100%;
     padding: 11px;
     margin-top: 8px;
-    display: none;
   }
-  .site-entry.editing .btn-cancel { display: block; }
-  .btn-submit {
+  .btn-cancel:hover { background: #d1d5db; }
+  .btn-show-form {
     background: #2563eb;
     color: #fff;
     width: 100%;
     padding: 12px;
     font-size: 15px;
-    margin-top: 8px;
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
   }
-  .btn-submit:hover { background: #1d4ed8; }
-  .btn-submit:disabled { background: #9ca3af; cursor: not-allowed; }
+  .btn-show-form:hover:not(:disabled) { background: #1d4ed8; }
+  .btn-show-form:disabled { background: #9ca3af; }
   table.sites-tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
   .sites-tbl th, .sites-tbl td {
     text-align: left;
     padding: 10px 12px;
     border-bottom: 1px solid #e5e7eb;
-    vertical-align: middle;
+    vertical-align: top;
   }
   .sites-tbl th { background: #f9fafb; font-weight: 600; color: #374151; font-size: 13px; }
   .sites-tbl tr:last-child td { border-bottom: none; }
   .sites-tbl tr.editing-row { background: #fffbeb; }
+  .schedule-lines { line-height: 1.6; }
+  .schedule-lines .line { display: block; }
   .table-wrap {
     border: 1px solid #e5e7eb;
     border-radius: 10px;
@@ -221,12 +224,13 @@
   }
   .btn-edit { color: #2563eb; }
   .btn-remove { color: #dc2626; }
+  .btn-link:disabled { opacity: 0.4; cursor: not-allowed; }
   .alert {
     display: none;
-    padding: 12px;
+    padding: 10px 14px;
     border-radius: 8px;
-    margin-top: 16px;
-    font-size: 14px;
+    margin-top: 12px;
+    font-size: 13px;
   }
   .alert.success { background: #d1fae5; color: #065f46; }
   .alert.error { background: #fee2e2; color: #991b1b; }
@@ -262,29 +266,17 @@
     border-radius: 6px;
     font-size: 13px;
     color: #1e40af;
-    margin-bottom: 12px;
+    margin-bottom: 20px;
     line-height: 1.5;
   }
-  .save-required-note {
-    background: #fef3c7;
-    border: 1px solid #fcd34d;
-    border-radius: 8px;
-    padding: 12px 14px;
-    font-size: 13px;
-    color: #92400e;
-    margin-top: 12px;
-    margin-bottom: 4px;
-    display: none;
-    line-height: 1.5;
-  }
-  .save-required-note.visible { display: block; }
-  .save-required-note strong { color: #78350f; }
 
+  /* Schedule mode radios with OR divider */
   .schedule-type-toggle {
     display: flex;
     gap: 8px;
     margin-bottom: 12px;
     flex-wrap: wrap;
+    align-items: stretch;
   }
   .radio-label {
     display: flex !important;
@@ -307,6 +299,19 @@
   .radio-label:hover { border-color: #2563eb; background: #eff6ff; }
   .radio-label input[type="radio"] { cursor: pointer; margin: 0; accent-color: #2563eb; }
   .radio-label.active { border-color: #2563eb; background: #eff6ff; color: #1e40af !important; font-weight: 600 !important; }
+  .or-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #9ca3af;
+    letter-spacing: 0.08em;
+    padding: 0 4px;
+  }
+  @media (max-width: 500px) {
+    .or-divider { width: 100%; padding: 4px 0; }
+  }
 
   .grid-hint {
     font-size: 12px;
@@ -375,12 +380,15 @@
     word-break: break-word;
   }
   .schedule-summary.visible { display: block; }
+
+  .form-section { display: none; margin-top: 8px; }
+  .form-section.visible { display: block; }
 </style>
 </head>
 <body>
   <header class="topbar">
     <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">☰</button>
-    <div class="brand">Le Parfait</div>
+    <div class="brand">Le Parfait Inspections</div>
   </header>
 
   <div class="layout">
@@ -393,6 +401,10 @@
         <a class="nav-item active" data-view="siteInspectionSetup">
           <span class="nav-icon">📅</span>
           <span>Site Inspection Setup</span>
+        </a>
+        <a class="nav-item" data-view="testAndTags">
+          <span class="nav-icon">🏷️</span>
+          <span>Test and Tags</span>
         </a>
       </nav>
     </aside>
@@ -413,120 +425,133 @@
       </div>
 
       <div class="view active" id="view-siteInspectionSetup">
-  <div class="container">
-    <h1>Site Inspection Setup</h1>
-    <p class="subtitle">Enter your details, add the sites you inspect, then submit.</p>
+        <div class="container">
+          <h1>Site Inspection Setup</h1>
+          <p class="subtitle">Select your state and name, then add the sites you inspect.</p>
 
-    <div class="info-notice">
-      ℹ️ <strong>How to use this form:</strong> Add, edit, or remove sites in the list below as many times as you need. <strong>Your changes are only saved when you click "Save &amp; Submit" at the bottom.</strong> Closing the page without submitting will lose any changes.
-    </div>
+          <div class="info-notice">
+            ℹ️ <strong>Changes are saved automatically.</strong> Each time you add, edit, or remove a site, the change is written to the spreadsheet immediately — no separate submit step.
+          </div>
 
-    <div class="field">
-      <label for="state">State</label>
-      <select id="state" required>
-        <option value="">-- Select State --</option>
-        <option value="WA">WA</option>
-        <option value="ACT">ACT</option>
-        <option value="QLD">QLD</option>
-        <option value="NSW">NSW</option>
-        <option value="VIC">VIC</option>
-      </select>
-    </div>
+          <div class="field">
+            <label for="state">State</label>
+            <select id="state" required>
+              <option value="">-- Select State --</option>
+              <option value="WA">WA</option>
+              <option value="ACT">ACT</option>
+              <option value="QLD">QLD</option>
+              <option value="NSW">NSW</option>
+              <option value="VIC">VIC</option>
+            </select>
+          </div>
 
-    <div class="field">
-      <label for="supervisor">Supervisor (Your Name)</label>
-      <select id="supervisor" required disabled>
-        <option value="">-- Select state first --</option>
-      </select>
-    </div>
+          <div class="field">
+            <label for="supervisor">Supervisor (Your Name)</label>
+            <select id="supervisor" required disabled>
+              <option value="">-- Select state first --</option>
+            </select>
+          </div>
 
-    <h2>
-      Sites to be Inspected
-      <span class="load-status" id="loadStatus"></span>
-    </h2>
-    <div class="table-wrap">
-      <table class="sites-tbl" id="sitesTable">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Site Name</th>
-            <th>Schedule</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="sitesTableBody">
-          <tr><td colspan="4" class="empty-row">No sites added yet.</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h2 id="siteFormTitle">Add Site Inspection Details</h2>
-    <div class="site-entry" id="siteEntry">
-      <div class="editing-banner" id="editingBanner">✎ Editing site — update fields and click "Save Changes"</div>
-      <div class="field">
-        <label for="siteName">Site Name</label>
-        <input type="text" id="siteName" placeholder="Enter site name" />
-      </div>
-      <div class="field">
-        <label>Inspection Schedule</label>
-        <div class="schedule-type-toggle">
-          <label class="radio-label active" id="gridModeLabel">
-            <input type="radio" name="scheduleType" value="grid" checked> 📅 Use 4-week grid
-          </label>
-          <label class="radio-label" id="customModeLabel">
-            <input type="radio" name="scheduleType" value="custom"> ✏️ Custom frequency (Other)
-          </label>
-        </div>
-
-        <div id="gridModeWrap">
-          <p class="grid-hint">
-            Tick the days this site is inspected across a 4-week cycle. The pattern repeats every 4 weeks.<br/>
-            <strong>Tip:</strong> click a day header (Mon, Tue…) to toggle that column across all weeks.
-          </p>
-          <div class="schedule-grid-wrap">
-            <table class="schedule-grid" id="scheduleGrid">
+          <h2>
+            Sites to be Inspected
+            <span class="load-status" id="loadStatus"></span>
+          </h2>
+          <div class="table-wrap">
+            <table class="sites-tbl" id="sitesTable">
               <thead>
                 <tr>
+                  <th>#</th>
+                  <th>Site Name</th>
+                  <th>Schedule</th>
                   <th></th>
-                  <th class="day-header" data-day="Mon">Mon</th>
-                  <th class="day-header" data-day="Tue">Tue</th>
-                  <th class="day-header" data-day="Wed">Wed</th>
-                  <th class="day-header" data-day="Thu">Thu</th>
-                  <th class="day-header" data-day="Fri">Fri</th>
-                  <th class="day-header" data-day="Sat">Sat</th>
-                  <th class="day-header" data-day="Sun">Sun</th>
                 </tr>
               </thead>
-              <tbody id="scheduleGridBody"></tbody>
+              <tbody id="sitesTableBody">
+                <tr><td colspan="4" class="empty-row">No sites added yet.</td></tr>
+              </tbody>
             </table>
           </div>
-          <div class="schedule-summary" id="scheduleSummary"></div>
-        </div>
 
-        <div id="customModeWrap" style="display: none;">
-          <p class="grid-hint">Enter the inspection frequency in your own words when it doesn't fit the 4-week grid.</p>
-          <input type="text" id="customFreq" placeholder="e.g. Every 3 months, Ad-hoc, On request, Twice a year" />
+          <button type="button" class="btn btn-show-form" id="showAddFormBtn" disabled>
+            + Add Site Inspection Details
+          </button>
+
+          <div class="alert success" id="successMsg">✓ Saved</div>
+          <div class="alert error" id="errorMsg"></div>
+
+          <div class="form-section" id="addFormSection">
+            <h2 id="siteFormTitle">Add Site Inspection Details</h2>
+            <div class="site-entry" id="siteEntry">
+              <div class="editing-banner" id="editingBanner">✎ Editing site — update fields and click "Save Changes"</div>
+              <div class="field">
+                <label for="siteName">Site Name</label>
+                <input type="text" id="siteName" placeholder="Enter site name" />
+              </div>
+              <div class="field">
+                <label>Inspection Schedule</label>
+                <div class="schedule-type-toggle">
+                  <label class="radio-label active" id="gridModeLabel">
+                    <input type="radio" name="scheduleType" value="grid" checked> 📅 Use 4-week grid
+                  </label>
+                  <span class="or-divider">OR</span>
+                  <label class="radio-label" id="customModeLabel">
+                    <input type="radio" name="scheduleType" value="custom"> ✏️ Custom frequency (Other)
+                  </label>
+                </div>
+
+                <div id="gridModeWrap">
+                  <p class="grid-hint">
+                    Tick the days this site is inspected across a 4-week cycle. The pattern repeats every 4 weeks.<br/>
+                    <strong>Tip:</strong> click a day header (Mon, Tue…) to toggle that column across all weeks.
+                  </p>
+                  <div class="schedule-grid-wrap">
+                    <table class="schedule-grid" id="scheduleGrid">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th class="day-header" data-day="Mon">Mon</th>
+                          <th class="day-header" data-day="Tue">Tue</th>
+                          <th class="day-header" data-day="Wed">Wed</th>
+                          <th class="day-header" data-day="Thu">Thu</th>
+                          <th class="day-header" data-day="Fri">Fri</th>
+                          <th class="day-header" data-day="Sat">Sat</th>
+                          <th class="day-header" data-day="Sun">Sun</th>
+                        </tr>
+                      </thead>
+                      <tbody id="scheduleGridBody"></tbody>
+                    </table>
+                  </div>
+                  <div class="schedule-summary" id="scheduleSummary"></div>
+                </div>
+
+                <div id="customModeWrap" style="display: none;">
+                  <p class="grid-hint">Enter the inspection frequency in your own words when it doesn't fit the 4-week grid.</p>
+                  <input type="text" id="customFreq" placeholder="e.g. Every 3 months, Ad-hoc, On request, Twice a year" />
+                </div>
+              </div>
+              <button type="button" class="btn btn-add" id="addSiteBtn">+ Add Site to List</button>
+              <button type="button" class="btn btn-cancel" id="cancelEditBtn">Cancel</button>
+            </div>
+          </div>
+
         </div>
       </div>
-      <button type="button" class="btn btn-add" id="addSiteBtn">+ Add Site to List</button>
-      <button type="button" class="btn btn-cancel" id="cancelEditBtn">Cancel Edit</button>
-    </div>
 
-    <div class="save-required-note" id="saveRequiredNote">
-      ⚠️ <strong>You have unsaved changes.</strong> Click "Save &amp; Submit" below to save your updates. Nothing is saved until you submit.
-    </div>
+      <div class="view" id="view-testAndTags">
+        <div class="container">
+          <h1>Test and Tags</h1>
+          <p class="subtitle">Test and Tags management.</p>
+          <div style="padding: 60px 20px; text-align: center; color: #9ca3af; font-style: italic; font-size: 14px; border: 2px dashed #e5e7eb; border-radius: 10px;">
+            🚧 This section is under construction.<br/>
+            UI to be defined.
+          </div>
+        </div>
+      </div>
 
-    <button type="button" class="btn btn-submit" id="submitBtn" disabled>Save &amp; Submit</button>
-    <div class="alert success" id="successMsg">✓ Saved successfully!</div>
-    <div class="alert error" id="errorMsg"></div>
-  </div>
-  </div>
     </main>
   </div>
 
 <script>
-  // ============================================================
-  //  PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL BELOW
   // ============================================================
   const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbycYPQAKkiCq-7Jm2u0Y2ahpfmZJka5rxnqubbs39ODgaL6tMLNZ_lYlgfKGnvn-ZmZhg/exec";
   // ============================================================
@@ -558,20 +583,15 @@
   const siteEntry = document.getElementById("siteEntry");
   const siteFormTitle = document.getElementById("siteFormTitle");
   const tableBody = document.getElementById("sitesTableBody");
-  const submitBtn = document.getElementById("submitBtn");
   const successMsg = document.getElementById("successMsg");
   const errorMsg = document.getElementById("errorMsg");
   const loadStatus = document.getElementById("loadStatus");
-  const saveRequiredNote = document.getElementById("saveRequiredNote");
+  const showAddFormBtn = document.getElementById("showAddFormBtn");
+  const addFormSection = document.getElementById("addFormSection");
 
   let sites = [];
   let editIndex = null;
   let fetchRequestId = 0;
-  let hasUnsavedChanges = false;
-
-  function markUnsaved() { hasUnsavedChanges = true; saveRequiredNote.classList.add("visible"); }
-  function markSaved() { hasUnsavedChanges = false; saveRequiredNote.classList.remove("visible"); }
-  window.addEventListener("beforeunload", (e) => { if (hasUnsavedChanges) { e.preventDefault(); e.returnValue = ""; } });
 
   // ---------- Schedule mode toggle ----------
   function getScheduleMode() { return document.querySelector('input[name="scheduleType"]:checked').value; }
@@ -589,7 +609,6 @@
   document.querySelectorAll('input[name="scheduleType"]').forEach(r => {
     r.addEventListener("change", updateScheduleModeUI);
   });
-  // ------------------------------------------
 
   // ---------- Schedule grid ----------
   function buildScheduleGrid() {
@@ -625,7 +644,6 @@
     });
   }
 
-  // Returns list of "Week N - Day" strings, in week-then-day order
   function getSelectedScheduleCells() {
     const cells = [];
     for (let w = 1; w <= 4; w++) {
@@ -636,9 +654,6 @@
     }
     return cells;
   }
-
-  // Try to parse a schedule string as a set of grid cells.
-  // Returns array of {week, day} on success, or null if any part doesn't match.
   function parseAsGridSchedule(scheduleStr) {
     if (!scheduleStr) return null;
     const parts = scheduleStr.split(",").map(s => s.trim()).filter(Boolean);
@@ -651,7 +666,6 @@
     }
     return cells;
   }
-
   function setSelectedScheduleFromString(scheduleStr) {
     scheduleGrid.querySelectorAll(".schedule-cell").forEach(c => c.classList.remove("selected"));
     const cells = parseAsGridSchedule(scheduleStr) || [];
@@ -661,20 +675,18 @@
     });
     updateScheduleSummary();
   }
-
   function clearSchedule() {
     scheduleGrid.querySelectorAll(".schedule-cell.selected").forEach(c => c.classList.remove("selected"));
     updateScheduleSummary();
   }
-
   function updateScheduleSummary() {
     const cells = getSelectedScheduleCells();
     if (cells.length === 0) { scheduleSummary.classList.remove("visible"); return; }
     scheduleSummary.textContent = "Schedule: " + cells.join(", ");
     scheduleSummary.classList.add("visible");
   }
-  // ---------- end schedule grid ----------
 
+  // ---------- State/Supervisor cascade ----------
   stateEl.addEventListener("change", () => {
     const st = stateEl.value;
     supEl.innerHTML = '<option value="">-- Select Supervisor --</option>';
@@ -689,11 +701,10 @@
       supEl.disabled = true;
     }
     sites = [];
-    resetEntryForm();
+    hideAndResetForm();
     refreshTable();
     setLoadStatus("");
-    markSaved();
-    updateSubmitState();
+    updateAddButtonState();
   });
 
   supEl.addEventListener("change", () => {
@@ -701,13 +712,16 @@
       loadExistingSites(stateEl.value, supEl.value);
     } else {
       sites = [];
-      resetEntryForm();
+      hideAndResetForm();
       refreshTable();
       setLoadStatus("");
-      markSaved();
-      updateSubmitState();
     }
+    updateAddButtonState();
   });
+
+  function updateAddButtonState() {
+    showAddFormBtn.disabled = !(stateEl.value && supEl.value);
+  }
 
   function setLoadStatus(state, text) {
     loadStatus.className = "load-status" + (state ? " " + state : "");
@@ -722,10 +736,8 @@
     const reqId = ++fetchRequestId;
     setLoadStatus("loading");
     sites = [];
-    resetEntryForm();
+    hideAndResetForm();
     refreshTable();
-    markSaved();
-    updateSubmitState();
     try {
       const url = WEBHOOK_URL + "?state=" + encodeURIComponent(state) + "&supervisor=" + encodeURIComponent(supervisor);
       const res = await fetch(url, { method: "GET" });
@@ -738,8 +750,6 @@
       if (data.sites && data.sites.length > 0) {
         sites = data.sites;
         refreshTable();
-        markSaved();
-        updateSubmitState();
         const when = data.submittedAt ? new Date(data.submittedAt).toLocaleDateString() : "";
         setLoadStatus("loaded", "✓ Loaded " + data.sites.length + " site" + (data.sites.length === 1 ? "" : "s") + (when ? " (last saved " + when + ")" : ""));
       } else {
@@ -755,6 +765,18 @@
     return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
 
+  // Format schedule for display in the table: one line per grid cell,
+  // or as-is if it's a custom (non-grid) frequency
+  function formatScheduleCell(scheduleStr) {
+    if (!scheduleStr) return "—";
+    const isGrid = parseAsGridSchedule(scheduleStr) !== null;
+    if (isGrid) {
+      const lines = scheduleStr.split(", ").map(v => '<span class="line">' + escapeHtml(v) + '</span>').join("");
+      return '<div class="schedule-lines">' + lines + '</div>';
+    }
+    return escapeHtml(scheduleStr);
+  }
+
   function refreshTable() {
     tableBody.innerHTML = "";
     if (sites.length === 0) {
@@ -764,11 +786,10 @@
     sites.forEach((s, i) => {
       const tr = document.createElement("tr");
       if (editIndex === i) tr.className = "editing-row";
-      const scheduleLabel = s.schedule || "—";
       tr.innerHTML = `
         <td>${i + 1}</td>
         <td>${escapeHtml(s.siteName)}</td>
-        <td>${escapeHtml(scheduleLabel)}</td>
+        <td>${formatScheduleCell(s.schedule)}</td>
         <td class="row-actions">
           <button type="button" class="btn-link btn-edit" data-edit="${i}">Edit</button>
           <button type="button" class="btn-link btn-remove" data-remove="${i}">Remove</button>
@@ -780,34 +801,18 @@
       b.addEventListener("click", () => startEdit(parseInt(b.dataset.edit)));
     });
     tableBody.querySelectorAll(".btn-remove").forEach(b => {
-      b.addEventListener("click", () => {
-        const i = parseInt(b.dataset.remove);
-        if (!confirm('Remove "' + sites[i].siteName + '" from the list? (You\'ll still need to click Save & Submit to save this change.)')) return;
-        sites.splice(i, 1);
-        if (editIndex === i) resetEntryForm();
-        else if (editIndex !== null && i < editIndex) editIndex--;
-        markUnsaved();
-        refreshTable();
-        updateSubmitState();
-      });
+      b.addEventListener("click", () => removeSite(parseInt(b.dataset.remove)));
     });
   }
 
-  function updateSubmitState() {
-    submitBtn.disabled = !(
-      stateEl.value &&
-      supEl.value &&
-      sites.length > 0 &&
-      editIndex === null
-    );
+  // ---------- Show/hide form section ----------
+  function showForm() {
+    addFormSection.classList.add("visible");
+    showAddFormBtn.style.display = "none";
+    addFormSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    siteNameEl.focus();
   }
-
-  [stateEl, supEl].forEach(el => {
-    el.addEventListener("input", updateSubmitState);
-    el.addEventListener("change", updateSubmitState);
-  });
-
-  function resetEntryForm() {
+  function hideAndResetForm() {
     editIndex = null;
     siteNameEl.value = "";
     clearSchedule();
@@ -816,13 +821,22 @@
     siteEntry.classList.remove("editing");
     siteFormTitle.textContent = "Add Site Inspection Details";
     addSiteBtn.textContent = "+ Add Site to List";
+    addFormSection.classList.remove("visible");
+    showAddFormBtn.style.display = "flex";
   }
+  showAddFormBtn.addEventListener("click", () => {
+    hideAndResetForm(); // ensures clean form state
+    showForm();
+  });
+  cancelEditBtn.addEventListener("click", () => {
+    hideAndResetForm();
+    refreshTable();
+  });
 
   function startEdit(i) {
     const s = sites[i];
     editIndex = i;
     siteNameEl.value = s.siteName;
-    // If schedule string parses cleanly as grid cells, load into grid; else load as custom text
     const gridCells = parseAsGridSchedule(s.schedule);
     if (gridCells && gridCells.length > 0) {
       setScheduleMode("grid");
@@ -836,20 +850,17 @@
     siteEntry.classList.add("editing");
     siteFormTitle.textContent = `Edit Site #${i + 1}`;
     addSiteBtn.textContent = "Save Changes";
+    addFormSection.classList.add("visible");
+    showAddFormBtn.style.display = "none";
     refreshTable();
-    updateSubmitState();
-    siteEntry.scrollIntoView({ behavior: "smooth", block: "center" });
+    addFormSection.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  cancelEditBtn.addEventListener("click", () => {
-    resetEntryForm();
-    refreshTable();
-    updateSubmitState();
-  });
-
-  addSiteBtn.addEventListener("click", () => {
+  // ---------- Add/Save/Remove with immediate spreadsheet write ----------
+  addSiteBtn.addEventListener("click", async () => {
     const name = siteNameEl.value.trim();
     if (!name) { alert("Please enter a site name."); return; }
+    if (!stateEl.value || !supEl.value) { alert("Please select a state and supervisor first."); return; }
 
     const mode = getScheduleMode();
     let schedule;
@@ -863,41 +874,60 @@
     }
 
     const record = { siteName: name, schedule: schedule };
+    const priorSites = sites.slice();
     if (editIndex !== null) sites[editIndex] = record;
     else sites.push(record);
-    markUnsaved();
-    resetEntryForm();
-    refreshTable();
-    updateSubmitState();
-    siteNameEl.focus();
+
+    addSiteBtn.disabled = true;
+    cancelEditBtn.disabled = true;
+    const originalLabel = addSiteBtn.textContent;
+    addSiteBtn.innerHTML = '<span class="spinner"></span>Saving...';
+
+    const ok = await saveToServer();
+
+    addSiteBtn.disabled = false;
+    cancelEditBtn.disabled = false;
+    addSiteBtn.textContent = originalLabel;
+
+    if (ok) {
+      showSuccess(editIndex !== null ? "✓ Site updated" : "✓ Site added");
+      hideAndResetForm();
+      refreshTable();
+    } else {
+      sites = priorSites; // roll back local state on failure
+      showError("Save failed — please try again.");
+    }
   });
 
-  function showError(msg) {
-    errorMsg.textContent = "✕ " + msg;
-    errorMsg.style.display = "block";
-    successMsg.style.display = "none";
-    setTimeout(() => errorMsg.style.display = "none", 6000);
-  }
-  function showSuccess() {
-    successMsg.style.display = "block";
-    errorMsg.style.display = "none";
-    setTimeout(() => successMsg.style.display = "none", 5000);
+  async function removeSite(i) {
+    if (!confirm('Remove "' + sites[i].siteName + '" from the list? This is saved immediately.')) return;
+    const priorSites = sites.slice();
+    sites.splice(i, 1);
+    if (editIndex === i) hideAndResetForm();
+    else if (editIndex !== null && i < editIndex) editIndex--;
+    refreshTable();
+
+    const ok = await saveToServer();
+    if (ok) {
+      showSuccess("✓ Site removed");
+    } else {
+      sites = priorSites;
+      refreshTable();
+      showError("Remove failed — please try again.");
+    }
   }
 
-  submitBtn.addEventListener("click", async () => {
+  async function saveToServer() {
     if (!WEBHOOK_URL || WEBHOOK_URL.includes("REPLACE_WITH")) {
-      showError("Webhook URL is not configured. Please set WEBHOOK_URL in the code.");
-      return;
+      showError("Webhook URL not configured.");
+      return false;
     }
     const payload = {
       state: stateEl.value,
       supervisor: supEl.value,
-      sites,
+      sites: sites,
       submittedAt: new Date().toISOString()
     };
-    submitBtn.disabled = true;
-    const originalText = submitBtn.textContent;
-    submitBtn.innerHTML = '<span class="spinner"></span>Saving...';
     try {
       await fetch(WEBHOOK_URL, {
         method: "POST",
@@ -905,41 +935,36 @@
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(payload)
       });
-      showSuccess();
-      markSaved();
-      stateEl.value = "";
-      supEl.innerHTML = '<option value="">-- Select state first --</option>';
-      supEl.disabled = true;
-      sites = [];
-      resetEntryForm();
-      refreshTable();
-      setLoadStatus("");
+      return true;
     } catch (err) {
-      showError("Save failed: " + err.message);
-    } finally {
-      submitBtn.textContent = originalText;
-      updateSubmitState();
+      console.error("Save error:", err);
+      return false;
     }
-  });
+  }
+
+  function showError(msg) {
+    errorMsg.textContent = "✕ " + msg;
+    errorMsg.style.display = "block";
+    successMsg.style.display = "none";
+    setTimeout(() => errorMsg.style.display = "none", 6000);
+  }
+  function showSuccess(msg) {
+    successMsg.textContent = msg || "✓ Saved";
+    successMsg.style.display = "block";
+    errorMsg.style.display = "none";
+    setTimeout(() => successMsg.style.display = "none", 3000);
+  }
 
   // ---------- Sidebar + Nav routing ----------
   const menuToggle = document.getElementById("menuToggle");
   const sidebar = document.getElementById("sidebar");
   const overlay = document.getElementById("overlay");
-
-  function closeDrawer() {
-    sidebar.classList.remove("open");
-    overlay.classList.remove("visible");
-  }
-  function openDrawer() {
-    sidebar.classList.add("open");
-    overlay.classList.add("visible");
-  }
+  function closeDrawer() { sidebar.classList.remove("open"); overlay.classList.remove("visible"); }
+  function openDrawer() { sidebar.classList.add("open"); overlay.classList.add("visible"); }
   menuToggle.addEventListener("click", () => {
     sidebar.classList.contains("open") ? closeDrawer() : openDrawer();
   });
   overlay.addEventListener("click", closeDrawer);
-
   document.querySelectorAll(".nav-item").forEach(link => {
     link.addEventListener("click", (e) => {
       e.preventDefault();
@@ -953,7 +978,6 @@
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
   });
-  // -------------------------------------------
 
   buildScheduleGrid();
 </script>
