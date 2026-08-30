@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Site Inspection Details</title>
+<title>Site Inspection Setup</title>
 <style>
   * { box-sizing: border-box; }
   body {
@@ -188,18 +188,76 @@
   }
   .btn-show-form:hover:not(:disabled) { background: #1d4ed8; }
   .btn-show-form:disabled { background: #9ca3af; }
-  table.sites-tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+  table.sites-tbl { width: 100%; border-collapse: collapse; font-size: 14px; table-layout: fixed; }
   .sites-tbl th, .sites-tbl td {
     text-align: left;
     padding: 10px 12px;
     border-bottom: 1px solid #e5e7eb;
     vertical-align: top;
+    word-break: break-word;
   }
   .sites-tbl th { background: #f9fafb; font-weight: 600; color: #374151; font-size: 13px; }
   .sites-tbl tr:last-child td { border-bottom: none; }
   .sites-tbl tr.editing-row { background: #fffbeb; }
+  .sites-tbl col.col-num { width: 40px; }
+  .sites-tbl col.col-name { width: 24%; }
+  .sites-tbl col.col-actions { width: 40px; }
   .schedule-lines { line-height: 1.6; }
   .schedule-lines .line { display: block; }
+  @media (max-width: 600px) {
+    .sites-tbl col.col-name { width: 30%; }
+    .sites-tbl th, .sites-tbl td { padding: 10px 8px; }
+  }
+
+  /* Slide-to-reveal actions */
+  .actions-slot {
+    padding: 4px !important;
+    position: relative;
+    text-align: right;
+  }
+  .reveal-toggle {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    padding: 6px 8px;
+    font-size: 14px;
+    color: #6b7280;
+    line-height: 1;
+    transition: transform 0.25s ease, background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .reveal-toggle:hover { background: #f3f4f6; color: #374151; border-color: #e5e7eb; }
+  .actions-slot.open .reveal-toggle {
+    transform: rotate(180deg);
+    background: #eff6ff;
+    color: #1e40af;
+    border-color: #bfdbfe;
+  }
+  .actions-slide-panel {
+    position: absolute;
+    top: 50%;
+    right: 44px;
+    transform: translateY(-50%) translateX(24px);
+    opacity: 0;
+    pointer-events: none;
+    display: flex;
+    gap: 2px;
+    padding: 4px 6px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: transform 0.22s ease, opacity 0.18s ease;
+    white-space: nowrap;
+    z-index: 5;
+  }
+  .actions-slot.open .actions-slide-panel {
+    transform: translateY(-50%) translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .actions-slide-panel .btn-link { padding: 6px 10px; border-radius: 4px; }
+  .actions-slide-panel .btn-link:hover { background: #f3f4f6; }
   .table-wrap {
     border: 1px solid #e5e7eb;
     border-radius: 10px;
@@ -213,7 +271,6 @@
     font-style: italic;
     font-size: 13px;
   }
-  .row-actions { white-space: nowrap; }
   .btn-link {
     background: transparent;
     border: none;
@@ -400,7 +457,7 @@
         </a>
         <a class="nav-item active" data-view="siteInspectionSetup">
           <span class="nav-icon">📅</span>
-          <span>Site Inspection Details</span>
+          <span>Site Inspection Setup</span>
         </a>
         <a class="nav-item" data-view="testAndTags">
           <span class="nav-icon">🏷️</span>
@@ -426,8 +483,12 @@
 
       <div class="view active" id="view-siteInspectionSetup">
         <div class="container">
-          <h1>Site Inspection Details</h1>
+          <h1>Site Inspection Setup</h1>
           <p class="subtitle">Select your state and name, then add the sites you inspect.</p>
+
+          <div class="info-notice">
+            ℹ️ <strong>Changes are saved automatically.</strong> Each time you add, edit, or remove a site, the change is written to the spreadsheet immediately — no separate submit step.
+          </div>
 
           <div class="field">
             <label for="state">State</label>
@@ -454,6 +515,12 @@
           </h2>
           <div class="table-wrap">
             <table class="sites-tbl" id="sitesTable">
+              <colgroup>
+                <col class="col-num" />
+                <col class="col-name" />
+                <col />
+                <col class="col-actions" />
+              </colgroup>
               <thead>
                 <tr>
                   <th>#</th>
@@ -469,7 +536,7 @@
           </div>
 
           <button type="button" class="btn btn-show-form" id="showAddFormBtn" disabled>
-            Add More Sites to be Inspected
+            + Add Site Inspection Details
           </button>
 
           <div class="alert success" id="successMsg">✓ Saved</div>
@@ -786,20 +853,49 @@
         <td>${i + 1}</td>
         <td>${escapeHtml(s.siteName)}</td>
         <td>${formatScheduleCell(s.schedule)}</td>
-        <td class="row-actions">
-          <button type="button" class="btn-link btn-edit" data-edit="${i}">Edit</button>
-          <button type="button" class="btn-link btn-remove" data-remove="${i}">Remove</button>
+        <td class="actions-slot" data-idx="${i}">
+          <button type="button" class="reveal-toggle" aria-label="Toggle actions">‹</button>
+          <div class="actions-slide-panel">
+            <button type="button" class="btn-link btn-edit" data-edit="${i}">Edit</button>
+            <button type="button" class="btn-link btn-remove" data-remove="${i}">Remove</button>
+          </div>
         </td>
       `;
       tableBody.appendChild(tr);
     });
+    tableBody.querySelectorAll(".reveal-toggle").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const slot = btn.closest(".actions-slot");
+        const wasOpen = slot.classList.contains("open");
+        // Close any other open slots first
+        tableBody.querySelectorAll(".actions-slot.open").forEach(s => s.classList.remove("open"));
+        if (!wasOpen) slot.classList.add("open");
+      });
+    });
     tableBody.querySelectorAll(".btn-edit").forEach(b => {
-      b.addEventListener("click", () => startEdit(parseInt(b.dataset.edit)));
+      b.addEventListener("click", (e) => {
+        e.stopPropagation();
+        closeAllActionSlots();
+        startEdit(parseInt(b.dataset.edit));
+      });
     });
     tableBody.querySelectorAll(".btn-remove").forEach(b => {
-      b.addEventListener("click", () => removeSite(parseInt(b.dataset.remove)));
+      b.addEventListener("click", (e) => {
+        e.stopPropagation();
+        closeAllActionSlots();
+        removeSite(parseInt(b.dataset.remove));
+      });
     });
   }
+
+  function closeAllActionSlots() {
+    tableBody.querySelectorAll(".actions-slot.open").forEach(s => s.classList.remove("open"));
+  }
+  // Close open action panels when clicking anywhere else
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".actions-slot")) closeAllActionSlots();
+  });
 
   // ---------- Show/hide form section ----------
   function showForm() {
