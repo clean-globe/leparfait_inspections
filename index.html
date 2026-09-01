@@ -201,44 +201,38 @@
   .sites-tbl tr.editing-row { background: #fffbeb; }
   .sites-tbl col.col-num { width: 40px; }
   .sites-tbl col.col-name { width: 24%; }
-  .sites-tbl col.col-actions { width: 40px; }
+  .sites-tbl col.col-actions { width: 76px; }
   .schedule-lines { line-height: 1.6; }
   .schedule-lines .line { display: block; }
   @media (max-width: 600px) {
     .sites-tbl col.col-name { width: 30%; }
+    .sites-tbl col.col-actions { width: 68px; }
     .sites-tbl th, .sites-tbl td { padding: 10px 8px; }
   }
 
-  /* Slide-to-reveal actions */
+  /* Actions column: Edit trigger reveals slide-out panel with Edit + Remove */
   .actions-slot {
-    padding: 4px !important;
+    padding: 4px 6px !important;
     position: relative;
     text-align: right;
   }
-  .reveal-toggle {
-    background: #f3f4f6;
-    border: 1px solid #d1d5db;
+  .action-trigger {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
     border-radius: 6px;
     cursor: pointer;
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    font-size: 15px;
-    color: #374151;
-    line-height: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.25s ease, background 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s;
-  }
-  .reveal-toggle:hover {
-    background: #e0e7ff;
+    padding: 5px 14px;
+    font-size: 13px;
+    font-weight: 600;
     color: #1e40af;
-    border-color: #a5b4fc;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    line-height: 1.3;
+    transition: all 0.15s;
   }
-  .actions-slot.open .reveal-toggle {
-    transform: rotate(180deg);
+  .action-trigger:hover {
+    background: #dbeafe;
+    border-color: #93c5fd;
+  }
+  .actions-slot.open .action-trigger {
     background: #2563eb;
     color: #fff;
     border-color: #1d4ed8;
@@ -247,7 +241,7 @@
   .actions-slide-panel {
     position: absolute;
     top: 50%;
-    right: 44px;
+    right: calc(100% - 6px);
     transform: translateY(-50%) translateX(24px);
     opacity: 0;
     pointer-events: none;
@@ -267,8 +261,19 @@
     opacity: 1;
     pointer-events: auto;
   }
-  .actions-slide-panel .btn-link { padding: 6px 10px; border-radius: 4px; }
-  .actions-slide-panel .btn-link:hover { background: #f3f4f6; }
+  .panel-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 4px;
+    line-height: 1;
+  }
+  .panel-btn.panel-edit { color: #2563eb; }
+  .panel-btn.panel-remove { color: #dc2626; }
+  .panel-btn:hover { background: #f3f4f6; }
   .table-wrap {
     border: 1px solid #e5e7eb;
     border-radius: 10px;
@@ -543,7 +548,7 @@
           </div>
 
           <button type="button" class="btn btn-show-form" id="showAddFormBtn" disabled>
-           Add New Site Inspection Details
+            + Add Site Inspection Details
           </button>
 
           <div class="alert success" id="successMsg">✓ Saved</div>
@@ -595,8 +600,8 @@
                 </div>
 
                 <div id="customModeWrap" style="display: none;">
-                  <p class="grid-hint">Enter the inspection frequency in your own words</p>
-                  <input type="text" id="customFreq" placeholder="e.g. On request, Ad-hoc,..." />
+                  <p class="grid-hint">Enter the inspection frequency in your own words.</p>
+                  <input type="text" id="customFreq" placeholder="e.g. Every 3 months, Ad-hoc, On request, Twice a year" />
                 </div>
               </div>
               <button type="button" class="btn btn-add" id="addSiteBtn">+ Add Site to List</button>
@@ -821,7 +826,7 @@
         sites = data.sites;
         refreshTable();
         const when = data.submittedAt ? new Date(data.submittedAt).toLocaleDateString() : "";
-         setLoadStatus("loaded", "✓ Loaded " + data.sites.length + " site" + (data.sites.length === 1 ? "" : "s") + (when ? " (last saved " + when + ")" : ""));
+        setLoadStatus("loaded", "✓ Loaded " + data.sites.length + " site" + (data.sites.length === 1 ? "" : "s") + (when ? " (last saved " + when + ")" : ""));
       } else {
         setLoadStatus("empty", "No previous sites on record");
       }
@@ -861,33 +866,32 @@
         <td>${escapeHtml(s.siteName)}</td>
         <td>${formatScheduleCell(s.schedule)}</td>
         <td class="actions-slot" data-idx="${i}">
-          <button type="button" class="reveal-toggle" aria-label="Toggle actions">‹</button>
+          <button type="button" class="action-trigger" aria-label="Show actions">Edit</button>
           <div class="actions-slide-panel">
-            <button type="button" class="btn-link btn-edit" data-edit="${i}">Edit</button>
-            <button type="button" class="btn-link btn-remove" data-remove="${i}">Remove</button>
+            <button type="button" class="panel-btn panel-edit" data-edit="${i}">Edit</button>
+            <button type="button" class="panel-btn panel-remove" data-remove="${i}">Remove</button>
           </div>
         </td>
       `;
       tableBody.appendChild(tr);
     });
-    tableBody.querySelectorAll(".reveal-toggle").forEach(btn => {
+    tableBody.querySelectorAll(".action-trigger").forEach(btn => {
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
         const slot = btn.closest(".actions-slot");
         const wasOpen = slot.classList.contains("open");
-        // Close any other open slots first
-        tableBody.querySelectorAll(".actions-slot.open").forEach(s => s.classList.remove("open"));
+        closeAllActionSlots();
         if (!wasOpen) slot.classList.add("open");
       });
     });
-    tableBody.querySelectorAll(".btn-edit").forEach(b => {
+    tableBody.querySelectorAll(".panel-edit").forEach(b => {
       b.addEventListener("click", (e) => {
         e.stopPropagation();
         closeAllActionSlots();
         startEdit(parseInt(b.dataset.edit));
       });
     });
-    tableBody.querySelectorAll(".btn-remove").forEach(b => {
+    tableBody.querySelectorAll(".panel-remove").forEach(b => {
       b.addEventListener("click", (e) => {
         e.stopPropagation();
         closeAllActionSlots();
@@ -899,7 +903,7 @@
   function closeAllActionSlots() {
     tableBody.querySelectorAll(".actions-slot.open").forEach(s => s.classList.remove("open"));
   }
-  // Close open action panels when clicking anywhere else
+  // Close open panels on outside click
   document.addEventListener("click", (e) => {
     if (!e.target.closest(".actions-slot")) closeAllActionSlots();
   });
